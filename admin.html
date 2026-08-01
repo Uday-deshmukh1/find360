@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="theme-color" content="#070c1a"/>
+    <title>Find 360 - Dashboard</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+</head>
+<body>
+    <div class="admin">
+        <aside class="admin-side">
+            <a class="brand" href="admin.html">
+                <span class="dot"><span class="material-symbols-outlined">explore</span></span>
+                Find 360
+            </a>
+
+            <div class="admin-side-label" id="side-label">Dashboard</div>
+            <button class="navlink active" data-sec="dashboard" onclick="showSection('dashboard')">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </button>
+            <button class="navlink" data-sec="properties" onclick="showSection('properties')">
+                <span class="material-symbols-outlined">apartment</span><span id="nav-props-label">Properties</span>
+            </button>
+            <button class="navlink" data-sec="users" onclick="showSection('users')">
+                <span class="material-symbols-outlined">group</span>Users
+            </button>
+
+            <div class="side-foot">
+                <a class="navlink" href="app.html"><span class="material-symbols-outlined">storefront</span>Browse Site</a>
+                <button class="navlink" onclick="handleLogout()"><span class="material-symbols-outlined">logout</span>Sign out</button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <!-- ===== DASHBOARD ===== -->
+            <section id="sec-dashboard">
+                <div class="admin-head">
+                    <div>
+                        <h1 id="dash-title">Dashboard</h1>
+                        <p id="dash-sub">Everything at a glance</p>
+                    </div>
+                </div>
+                <div class="stats" id="stats-row">
+                    <div class="stat">
+                        <div class="icon"><span class="material-symbols-outlined">apartment</span></div>
+                        <div class="num" id="stat-1">—</div>
+                        <div class="lbl" id="lbl-1">Properties</div>
+                    </div>
+                    <div class="stat">
+                        <div class="icon"><span class="material-symbols-outlined">verified</span></div>
+                        <div class="num" id="stat-2">—</div>
+                        <div class="lbl" id="lbl-2">Verified</div>
+                    </div>
+                    <div class="stat">
+                        <div class="icon"><span class="material-symbols-outlined">schedule</span></div>
+                        <div class="num" id="stat-3">—</div>
+                        <div class="lbl" id="lbl-3">Pending</div>
+                    </div>
+                    <div class="stat">
+                        <div class="icon"><span class="material-symbols-outlined">group</span></div>
+                        <div class="num" id="stat-4">—</div>
+                        <div class="lbl" id="lbl-4">Users</div>
+                    </div>
+                </div>
+
+                <div class="section-head" style="margin-bottom:14px;">
+                    <h2 id="recent-title">Recent listings</h2>
+                    <button class="btn btn-ghost btn-sm" onclick="showSection('properties')">Manage all</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Property</th><th>Location</th><th>Price</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="recent-table"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:26px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== PROPERTIES ===== -->
+            <section id="sec-properties" style="display:none;">
+                <div class="admin-head">
+                    <div>
+                        <h1 id="props-title">Properties</h1>
+                        <p id="props-sub">Add, edit and manage listings</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openPropertyModal()">
+                        <span class="material-symbols-outlined">add</span><span id="add-btn-text">Add property</span>
+                    </button>
+                </div>
+
+                <div class="toolbar">
+                    <div class="searchbar">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="prop-search" placeholder="Search listings..."/>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Property</th><th>Location</th><th>BHK</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="props-table"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:26px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== USERS ===== -->
+            <section id="sec-users" style="display:none;">
+                <div class="admin-head">
+                    <div>
+                        <h1>Users</h1>
+                        <p id="users-sub">Accounts on the platform</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="searchbar">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="user-search" placeholder="Search users..."/>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="users-table"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:26px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ===== PROPERTY MODAL ===== -->
+    <div class="overlay" id="overlay" onclick="closePropertyModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="modal-title">List property</h3>
+            <p class="muted" id="modal-sub">Your listing goes to the admin for approval</p>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="f-title">Title</label>
+                    <input class="input" id="f-title" placeholder="Spacious 3BHK in Baner" required/>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label for="f-price">Price (₹)</label>
+                        <input class="input" id="f-price" type="number" min="0" step="10000" placeholder="8500000" required/>
+                    </div>
+                    <div class="field">
+                        <label for="f-bhk">BHK / Type</label>
+                        <input class="input" id="f-bhk" placeholder="3 BHK, Plot, Villa"/>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="f-location">Location</label>
+                    <input class="input" id="f-location" list="loc-suggest" placeholder="City or locality" required/>
+                    <datalist id="loc-suggest">
+                        <option value="Pune"></option><option value="Mumbai"></option><option value="Delhi"></option>
+                        <option value="Bangalore"></option><option value="Hyderabad"></option><option value="Chennai"></option>
+                        <option value="Kolkata"></option><option value="Ahmedabad"></option><option value="Jaipur"></option>
+                        <option value="Nagpur"></option><option value="Nashik"></option><option value="Aurangabad"></option>
+                    </datalist>
+                </div>
+                <div class="field">
+                    <label for="f-desc">Description</label>
+                    <textarea class="input" id="f-desc" placeholder="Short description of the property"></textarea>
+                </div>
+                <div class="field">
+                    <label for="f-images">Image URLs (comma separated)</label>
+                    <textarea class="input" id="f-images" placeholder="https://.../1.jpg, https://.../2.jpg" style="min-height:64px;"></textarea>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="f-verified"/>
+                    <span class="track"></span>
+                    <span>Mark as verified</span>
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-ghost btn-sm" onclick="closePropertyModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" onclick="saveProperty()">Save listing</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        let user = null;
+        let role = 'user';
+        let allProps = [];
+        let allUsers = [];
+        let editingId = null;
+
+        const ROLES = ['user', 'agent', 'admin'];
+        const STATUS_BADGE = { pending: 'violet', approved: 'green', rejected: 'red' };
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function formatPrice(n) {
+            if (n >= 10000000) return '\u20B9' + (n / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            if (n >= 100000) return '\u20B9' + (n / 100000).toFixed(1).replace(/\.0$/, '') + ' L';
+            return '\u20B9' + Number(n).toLocaleString('en-IN');
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        // ===== GUARD =====
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            user = session.user;
+
+            const { data: rec } = await supabase.from('users').select('role, banned').eq('id', user.id).maybeSingle();
+
+            if (rec?.banned) {
+                await supabase.auth.signOut();
+                alert('Your account has been banned by the admin.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            role = rec?.role || 'user';
+            applyRoleUI();
+
+            loadStats();
+            loadRecent();
+            loadProperties();
+            loadUsers();
+            setupSearches();
+        });
+
+        function applyRoleUI() {
+            const isAdmin = role === 'admin';
+            $('side-label').textContent = isAdmin ? 'Admin Panel' : 'Your Dashboard';
+            $('nav-props-label').textContent = isAdmin ? 'Properties' : 'My Listings';
+            $('dash-title').textContent = isAdmin ? 'Admin Dashboard' : 'My Dashboard';
+            $('dash-sub').textContent = isAdmin ? 'Everything at a glance' : 'Your listings at a glance';
+            $('props-title').textContent = isAdmin ? 'Properties' : 'My Listings';
+            $('props-sub').textContent = isAdmin
+                ? 'Review, approve and manage all listings'
+                : 'Submit a listing — the admin approves it before it goes live';
+            $('add-btn-text').textContent = isAdmin ? 'Add property' : 'List a property';
+            $('recent-title').textContent = isAdmin ? 'Recent listings' : 'My recent listings';
+            $('users-sub').textContent = isAdmin ? 'Manage accounts, roles and bans' : 'Accounts on the platform';
+            if (!isAdmin) {
+                $('lbl-4').textContent = 'Rejected';
+                $('stat-4').closest('.stat').querySelector('.icon').innerHTML = '<span class="material-symbols-outlined">block</span>';
+            }
+        }
+
+        // ===== NAV =====
+        function showSection(sec) {
+            document.querySelectorAll('.admin-main > section').forEach(s => s.style.display = 'none');
+            $('sec-' + sec).style.display = 'block';
+            document.querySelectorAll('.navlink[data-sec]').forEach(n => n.classList.toggle('active', n.dataset.sec === sec));
+        }
+
+        // ===== DASHBOARD STATS =====
+        async function loadStats() {
+            if (role === 'admin') {
+                const [props, verified, pending, users] = await Promise.all([
+                    supabase.from('properties').select('id', { count: 'exact', head: true }),
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('verified', true),
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+                    supabase.from('users').select('id', { count: 'exact', head: true })
+                ]);
+                $('stat-1').textContent = props.count ?? '0';
+                $('stat-2').textContent = verified.count ?? '0';
+                $('stat-3').textContent = pending.count ?? '0';
+                $('stat-4').textContent = users.count ?? '0';
+            } else {
+                const [all, approved, pending, rejected] = await Promise.all([
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('owner_id', user.id),
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('owner_id', user.id).eq('status', 'approved'),
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('owner_id', user.id).eq('status', 'pending'),
+                    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('owner_id', user.id).eq('status', 'rejected')
+                ]);
+                $('lbl-1').textContent = 'My listings';
+                $('lbl-2').textContent = 'Approved';
+                $('lbl-3').textContent = 'Pending';
+                $('stat-1').textContent = all.count ?? '0';
+                $('stat-2').textContent = approved.count ?? '0';
+                $('stat-3').textContent = pending.count ?? '0';
+                $('stat-4').textContent = rejected.count ?? '0';
+            }
+        }
+
+        async function loadRecent() {
+            let q = supabase.from('properties').select('*').order('created_at', { ascending: false }).limit(6);
+            if (role !== 'admin') q = q.eq('owner_id', user.id);
+            const { data } = await q;
+            const tb = $('recent-table');
+            if (!data || data.length === 0) {
+                tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:26px;">' + (role === 'admin' ? 'No listings yet.' : 'You have no listings yet. Click "List a property".') + '</td></tr>';
+                return;
+            }
+            tb.innerHTML = data.map(p => `
+                <tr>
+                    <td class="tcell-strong">${esc(p.title)}</td>
+                    <td>${esc(p.location)}</td>
+                    <td>${formatPrice(p.price)}</td>
+                    <td><span class="badge-pill ${STATUS_BADGE[p.status] || 'gray'}">${esc(p.status || 'pending')}</span></td>
+                </tr>`).join('');
+        }
+
+        // ===== PROPERTIES =====
+        async function loadProperties() {
+            let q = supabase.from('properties').select('*').order('created_at', { ascending: false });
+            if (role !== 'admin') q = q.eq('owner_id', user.id);
+            const { data, error } = await q;
+            if (error) {
+                console.error(error);
+                $('props-table').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--error);padding:26px;">Failed to load listings.</td></tr>';
+                return;
+            }
+            allProps = data || [];
+            renderProps();
+        }
+
+        function renderProps() {
+            const q = ($('prop-search').value || '').toLowerCase();
+            const list = allProps.filter(p =>
+                !q || (p.title || '').toLowerCase().includes(q) || (p.location || '').toLowerCase().includes(q)
+            );
+            const tb = $('props-table');
+            const isAdmin = role === 'admin';
+            if (!list.length) {
+                tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:26px;">' + (isAdmin ? 'No listings found.' : 'You have no listings yet.') + '</td></tr>';
+                return;
+            }
+            tb.innerHTML = list.map(p => {
+                let actions = `
+                    <button class="icon-btn" title="Edit" onclick="openPropertyModal('${p.id}')"><span class="material-symbols-outlined">edit</span></button>
+                    <button class="icon-btn danger" title="Delete" onclick="deleteProperty('${p.id}')"><span class="material-symbols-outlined">delete</span></button>`;
+                if (isAdmin && p.status === 'pending') {
+                    actions = `
+                    <button class="btn btn-primary btn-sm" title="Approve" onclick="setStatus('${p.id}','approved')">Approve</button>
+                    <button class="btn btn-danger btn-sm" title="Reject" onclick="setStatus('${p.id}','rejected')">Reject</button>` + actions;
+                }
+                return `
+                <tr>
+                    <td class="tcell-strong">${esc(p.title)}</td>
+                    <td>${esc(p.location)}</td>
+                    <td>${esc(p.bhk || '—')}</td>
+                    <td>${formatPrice(p.price)}</td>
+                    <td><span class="badge-pill ${STATUS_BADGE[p.status] || 'gray'}">${esc(p.status || 'pending')}</span></td>
+                    <td><div class="row-actions">${actions}</div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function setStatus(id, status) {
+            const { error } = await supabase.from('properties').update({ status }).eq('id', id);
+            if (error) { showToast('Failed: ' + error.message); return; }
+            showToast(status === 'approved' ? 'Listing approved — it is now live.' : 'Listing rejected.');
+            await loadProperties();
+            await loadRecent();
+            await loadStats();
+        }
+
+        function openPropertyModal(id) {
+            editingId = id || null;
+            const p = id ? allProps.find(x => x.id === id) : null;
+            $('modal-title').textContent = p ? 'Edit listing' : 'List property';
+            $('modal-sub').textContent = p ? 'Update your listing (it goes back to pending)' : 'Your listing goes to the admin for approval';
+            $('f-title').value = p?.title || '';
+            $('f-price').value = p?.price || '';
+            $('f-bhk').value = p?.bhk || '';
+            $('f-location').value = p?.location || '';
+            $('f-desc').value = p?.description || '';
+            $('f-images').value = (p?.image_urls || []).join(', ');
+            $('f-verified').checked = !!p?.verified;
+            $('overlay').classList.add('show');
+        }
+
+        function closePropertyModal(e) {
+            if (e && e.target !== $('overlay')) return;
+            $('overlay').classList.remove('show');
+            editingId = null;
+        }
+
+        async function saveProperty() {
+            const title = $('f-title').value.trim();
+            const price = parseInt($('f-price').value, 10);
+            const location = $('f-location').value.trim();
+            if (!title || !price || !location) {
+                showToast('Title, price and location are required.');
+                return;
+            }
+
+            const isAdmin = role === 'admin';
+            const existing = editingId ? allProps.find(x => x.id === editingId) : null;
+            const payload = {
+                title,
+                price,
+                location,
+                bhk: $('f-bhk').value.trim(),
+                description: $('f-desc').value.trim(),
+                image_urls: $('f-images').value.split(',').map(s => s.trim()).filter(Boolean),
+                verified: $('f-verified').checked
+            };
+
+            if (editingId) {
+                payload.status = isAdmin ? existing?.status || 'pending' : 'pending';
+                const { error } = await supabase.from('properties').update(payload).eq('id', editingId);
+                if (error) { showToast('Save failed: ' + error.message); return; }
+                showToast(isAdmin ? 'Listing updated.' : 'Listing updated — sent back for approval.');
+            } else {
+                payload.owner_id = isAdmin ? null : user.id;
+                payload.status = isAdmin ? 'approved' : 'pending';
+                const { error } = await supabase.from('properties').insert(payload);
+                if (error) { showToast('Save failed: ' + error.message); return; }
+                showToast(isAdmin ? 'Property added.' : 'Listing submitted — awaiting admin approval.');
+            }
+
+            $('overlay').classList.remove('show');
+            editingId = null;
+            await loadProperties();
+            await loadRecent();
+            await loadStats();
+        }
+
+        async function deleteProperty(id) {
+            if (!confirm('Delete this listing permanently?')) return;
+            const { error } = await supabase.from('properties').delete().eq('id', id);
+            if (error) { showToast('Delete failed: ' + error.message); return; }
+            showToast('Listing deleted.');
+            await loadProperties();
+            await loadRecent();
+            await loadStats();
+        }
+
+        // ===== USERS =====
+        async function loadUsers() {
+            const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error(error);
+                $('users-table').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--error);padding:26px;">Failed to load users.</td></tr>';
+                return;
+            }
+            allUsers = data || [];
+            renderUsers();
+        }
+
+        function renderUsers() {
+            const q = ($('user-search').value || '').toLowerCase();
+            const list = allUsers.filter(u =>
+                !q ||
+                (u.name || '').toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q)
+            );
+            const tb = $('users-table');
+            const isAdmin = role === 'admin';
+            if (!list.length) {
+                tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:26px;">No users found.</td></tr>';
+                return;
+            }
+            tb.innerHTML = list.map(u => `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            ${u.profile_photo_url
+                                ? `<img class="avatar" src="${esc(u.profile_photo_url)}" alt="" style="width:34px;height:34px;"/>`
+                                : `<div class="avatar-ph" style="width:34px;height:34px;font-size:17px;"><span class="material-symbols-outlined">person</span></div>`}
+                            <span class="tcell-strong">${esc(u.name || '—')}</span>
+                            ${u.banned ? '<span class="badge-pill red">Banned</span>' : ''}
+                        </div>
+                    </td>
+                    <td>${esc(u.email || '—')}</td>
+                    <td>
+                        ${isAdmin
+                            ? `<select class="role-select" data-id="${u.id}" onchange="changeRole(this)">${ROLES.map(r => `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select>`
+                            : `<span class="tcell-strong">${esc(u.role || 'user')}</span>`}
+                    </td>
+                    <td>${fmtDate(u.created_at)}</td>
+                    <td>
+                        ${isAdmin ? `
+                        <div class="row-actions">
+                            <button class="icon-btn ${u.banned ? '' : 'danger'}" title="${u.banned ? 'Unban' : 'Ban'}" onclick="toggleBan('${u.id}', ${u.banned})">
+                                <span class="material-symbols-outlined">${u.banned ? 'lock_open' : 'block'}</span>
+                            </button>
+                            <button class="icon-btn danger" title="Delete" onclick="deleteUser('${u.id}', '${esc(u.name || u.email || '')}')"><span class="material-symbols-outlined">delete</span></button>
+                        </div>` : '—'}
+                    </td>
+                </tr>`).join('');
+        }
+
+        async function changeRole(sel) {
+            if (sel.dataset.id === user.id && sel.value !== 'admin') {
+                if (!confirm('This is your own account. Removing admin access will lock you out of admin controls. Continue?')) {
+                    sel.value = 'admin';
+                    return;
+                }
+            }
+            const { error } = await supabase.from('users').update({ role: sel.value }).eq('id', sel.dataset.id);
+            if (error) { showToast('Role update failed: ' + error.message); await loadUsers(); return; }
+            showToast('Role updated to ' + sel.value + '.');
+            await loadStats();
+        }
+
+        async function toggleBan(id, currentlyBanned) {
+            const action = currentlyBanned ? 'unban' : 'ban';
+            if (!confirm('Are you sure you want to ' + action + ' this user?')) return;
+            const { error } = await supabase.from('users').update({ banned: !currentlyBanned }).eq('id', id);
+            if (error) { showToast(action + ' failed: ' + error.message); return; }
+            showToast(action === 'ban' ? 'User banned. They can no longer sign in.' : 'User unbanned.');
+            await loadUsers();
+        }
+
+        async function deleteUser(id, name) {
+            if (!confirm('Delete user "' + name + '"? Their likes and listings stay visible but the account is removed.')) return;
+            const { error } = await supabase.from('users').delete().eq('id', id);
+            if (error) { showToast('Delete failed: ' + error.message); return; }
+            showToast('User deleted.');
+            await loadUsers();
+            await loadStats();
+        }
+
+        // ===== SEARCH =====
+        function setupSearches() {
+            let d1, d2;
+            $('prop-search').addEventListener('input', () => { clearTimeout(d1); d1 = setTimeout(renderProps, 200); });
+            $('user-search').addEventListener('input', () => { clearTimeout(d2); d2 = setTimeout(renderUsers, 200); });
+        }
+
+        // ===== LOGOUT =====
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

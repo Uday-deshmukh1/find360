@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="theme-color" content="#070c1a"/>
+    <title>Find 360</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <span class="dot"><span class="material-symbols-outlined">explore</span></span>
+                Find 360
+            </div>
+            <div class="topbar-actions">
+                <a class="chip" href="admin.html" style="display:flex;">
+                    <span class="material-symbols-outlined">add</span>List
+                </a>
+                <a class="chip" id="admin-pill" href="admin.html" style="display:none;">
+                    <span class="material-symbols-outlined">admin_panel_settings</span>Admin
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="app">
+        <!-- ===== DISCOVER ===== -->
+        <section class="panel active" id="panel-discover">
+            <div class="section-head">
+                <div>
+                    <h2>Discover</h2>
+                    <p id="result-count">Finding the best places near you</p>
+                </div>
+            </div>
+
+            <div class="searchbar">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="search-input" placeholder="Search locality, property, builder..."/>
+            </div>
+
+            <div class="chips-row" id="location-chips"></div>
+
+            <div class="filters-row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <button class="chip" id="price-chip">
+                    <span class="material-symbols-outlined">payments</span>
+                    <span id="price-label">Price</span>
+                </button>
+                <button class="chip" id="clear-btn" style="display:none;color:var(--error);border-color:var(--error);" onclick="clearFilters()">
+                    <span class="material-symbols-outlined">close</span>Clear
+                </button>
+            </div>
+
+            <div class="price-panel" id="price-panel"></div>
+
+            <div class="props" id="properties-list"></div>
+            <div class="empty" id="empty-state" style="display:none;">
+                <span class="material-symbols-outlined">search_off</span>
+                <p>No properties match. Try another location or price range.</p>
+            </div>
+        </section>
+
+        <!-- ===== FAVORITES ===== -->
+        <section class="panel" id="panel-favorites">
+            <div class="section-head">
+                <div>
+                    <h2>Favorites</h2>
+                    <p>Properties you've liked</p>
+                </div>
+            </div>
+            <div class="props" id="favorites-list"></div>
+            <div class="empty" id="empty-favs" style="display:none;">
+                <span class="material-symbols-outlined">favorite_border</span>
+                <p>Tap the heart on any property to save it here.</p>
+            </div>
+        </section>
+
+        <!-- ===== ACCOUNT ===== -->
+        <section class="panel" id="panel-account">
+            <div class="section-head">
+                <div>
+                    <h2>Account</h2>
+                    <p>Your profile</p>
+                </div>
+            </div>
+
+            <div class="account">
+                <div class="profile-card">
+                    <img class="avatar" id="profile-photo" src="" alt="" style="display:none;"/>
+                    <div class="avatar-ph" id="profile-placeholder"><span class="material-symbols-outlined">person</span></div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">Loading...</div>
+                        <div class="profile-email" id="profile-email"></div>
+                    </div>
+                </div>
+
+                <a class="menu-item" href="admin.html" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">storefront</span>
+                    My Listings
+                </a>
+                <button class="menu-item" onclick="switchTab('favorites')">
+                    <span class="material-symbols-outlined">favorite</span>
+                    My Favorites
+                </button>
+                <button class="menu-item danger" onclick="handleLogout()">
+                    <span class="material-symbols-outlined">logout</span>
+                    Sign out
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <nav class="tabbar">
+        <button class="tab active" data-tab="discover" onclick="switchTab('discover')">
+            <span class="material-symbols-outlined">search</span>Discover
+        </button>
+        <button class="tab" data-tab="favorites" onclick="switchTab('favorites')">
+            <span class="material-symbols-outlined">favorite</span>Favorites
+        </button>
+        <button class="tab" data-tab="account" onclick="switchTab('account')">
+            <span class="material-symbols-outlined">person</span>Account
+        </button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+
+        let user = null;
+        let role = 'user';
+        let allProperties = [];
+        let liked = new Set();
+        let activeLoc = null;
+        let activePrice = null;
+        let query = '';
+
+        const LOCATIONS = ['Pune', 'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Nagpur', 'Indore', 'Nashik', 'Aurangabad'];
+
+        const PRICE_PRESETS = [
+            { label: 'Any', min: null, max: null },
+            { label: 'Under \u20B950L', min: null, max: 5000000 },
+            { label: '\u20B950L\u20131Cr', min: 5000000, max: 10000000 },
+            { label: '\u20B91\u20135 Cr', min: 10000000, max: 50000000 },
+            { label: '\u20B95 Cr+', min: 50000000, max: null }
+        ];
+
+        const DEMO = [
+            { id: 'demo-1', title: 'Spacious 3BHK in Baner', price: 8500000, location: 'Pune', bhk: '3 BHK', description: 'Well-ventilated apartment with modern amenities.', image_urls: [], verified: true },
+            { id: 'demo-2', title: 'Modern 2BHK Apartment', price: 5200000, location: 'Pune', bhk: '2 BHK', description: 'Smart home features, near the metro station.', image_urls: [], verified: false },
+            { id: 'demo-3', title: 'Luxury Villa with Garden', price: 15000000, location: 'Mumbai', bhk: '4 BHK', description: 'Premium villa with private garden and pool.', image_urls: [], verified: true },
+            { id: 'demo-4', title: 'Cozy 1BHK Near Metro', price: 2800000, location: 'Delhi', bhk: '1 BHK', description: 'Affordable living with great connectivity.', image_urls: [], verified: false },
+            { id: 'demo-5', title: 'Plot in Growing Area', price: 3500000, location: 'Bangalore', bhk: 'Plot', description: 'Investment-ready plot in an upcoming locality.', image_urls: [], verified: true },
+            { id: 'demo-6', title: '2BHK in Housing Society', price: 4100000, location: 'Hyderabad', bhk: '2 BHK', description: 'Gated community with all facilities.', image_urls: [], verified: false }
+        ];
+
+        function formatPrice(n) {
+            if (n >= 10000000) return '\u20B9' + (n / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            if (n >= 100000) return '\u20B9' + (n / 100000).toFixed(1).replace(/\.0$/, '') + ' L';
+            return '\u20B9' + n.toLocaleString('en-IN');
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return '';
+            return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+            user = session.user;
+
+            const { data: rec } = await supabase.from('users').select('role, banned').eq('id', user.id).maybeSingle();
+
+            if (rec?.banned) {
+                await supabase.auth.signOut();
+                alert('Your account has been banned by the admin.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            role = rec?.role || 'user';
+            if (role === 'admin') $('admin-pill').style.display = 'flex';
+
+            loadProfile();
+            renderChips();
+            renderPricePanel();
+            setupSearch();
+            await loadProperties();
+            await loadLikes();
+        });
+
+        // ===== PROFILE =====
+        function loadProfile() {
+            const photo = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+            const name = user.user_metadata?.full_name || user.user_metadata?.name || 'User';
+            $('profile-name').textContent = name;
+            $('profile-email').textContent = user.email || '';
+            if (photo) {
+                const img = $('profile-photo');
+                img.src = photo;
+                img.style.display = 'block';
+                $('profile-placeholder').style.display = 'none';
+            }
+        }
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tab) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            $('panel-' + tab).classList.add('active');
+            document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
+        }
+
+        // ===== LOCATION CHIPS =====
+        function renderChips() {
+            const list = ['All', ...LOCATIONS];
+            $('location-chips').innerHTML = list.map(loc =>
+                `<button class="chip ${loc === (activeLoc || 'All') ? 'active' : ''}" onclick="selectLoc('${loc}')">${loc}</button>`
+            ).join('');
+        }
+
+        function selectLoc(loc) {
+            activeLoc = loc === 'All' ? null : loc;
+            renderChips();
+            filterAndRender();
+        }
+
+        // ===== PRICE FILTER =====
+        function renderPricePanel() {
+            $('price-panel').innerHTML = PRICE_PRESETS.map((p, i) =>
+                `<button class="price-opt ${activePrice === i ? 'active' : ''}" onclick="selectPrice(${i})">${p.label}</button>`
+            ).join('');
+        }
+
+        function selectPrice(i) {
+            activePrice = activePrice === i ? null : i;
+            $('price-label').textContent = activePrice === null ? 'Price' : PRICE_PRESETS[activePrice].label;
+            $('price-chip').classList.toggle('active', activePrice !== null);
+            renderPricePanel();
+            filterAndRender();
+        }
+
+        $('price-chip').addEventListener('click', () => {
+            $('price-panel').classList.toggle('show');
+        });
+
+        function clearFilters() {
+            query = '';
+            $('search-input').value = '';
+            activeLoc = null;
+            activePrice = null;
+            $('price-label').textContent = 'Price';
+            $('price-chip').classList.remove('active');
+            $('clear-btn').style.display = 'none';
+            renderChips();
+            renderPricePanel();
+            filterAndRender();
+        }
+
+        // ===== SEARCH =====
+        function setupSearch() {
+            let debounce;
+            $('search-input').addEventListener('input', (e) => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    query = e.target.value.toLowerCase().trim();
+                    filterAndRender();
+                }, 200);
+            });
+        }
+
+        function filterAndRender() {
+            let list = [...allProperties];
+            if (query) {
+                list = list.filter(p =>
+                    (p.title || '').toLowerCase().includes(query) ||
+                    (p.location || '').toLowerCase().includes(query) ||
+                    (p.description || '').toLowerCase().includes(query)
+                );
+            }
+            if (activeLoc) list = list.filter(p => p.location === activeLoc);
+            if (activePrice !== null) {
+                const pr = PRICE_PRESETS[activePrice];
+                if (pr.min) list = list.filter(p => p.price >= pr.min);
+                if (pr.max) list = list.filter(p => p.price <= pr.max);
+            }
+            renderProps($('properties-list'), list, 'search');
+            $('empty-state').style.display = list.length ? 'none' : 'flex';
+            $('result-count').textContent = list.length + (list.length === 1 ? ' place found' : ' places found');
+            $('clear-btn').style.display = (activeLoc || activePrice !== null || query) ? 'flex' : 'none';
+        }
+
+        // ===== PROPERTIES =====
+        async function loadProperties() {
+            const { data, error } = await supabase
+                .from('properties')
+                .select('*')
+                .eq('status', 'approved')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Load properties error:', error);
+                allProperties = DEMO;
+            } else if (data && data.length > 0) {
+                allProperties = data;
+            } else {
+                allProperties = DEMO;
+            }
+            filterAndRender();
+        }
+
+        function cardHTML(p, inFav) {
+            const img = p.image_urls && p.image_urls.length > 0
+                ? `<img src="${esc(p.image_urls[0])}" alt="${esc(p.title)}" loading="lazy"/>`
+                : `<span class="material-symbols-outlined ph">home</span>`;
+            const verified = p.verified
+                ? `<span class="verify"><span class="material-symbols-outlined" style="font-size:13px;">verified</span>Verified</span>`
+                : '';
+            const isLiked = liked.has(p.id);
+            return `
+                <article class="prop">
+                    <div class="prop-img">
+                        ${img}
+                        ${verified}
+                        <button class="like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', this, ${inFav})">
+                            <span class="material-symbols-outlined">${isLiked ? 'favorite' : 'favorite_border'}</span>
+                        </button>
+                    </div>
+                    <div class="prop-body">
+                        <div class="prop-price">${formatPrice(p.price)}</div>
+                        <div class="prop-title">${esc(p.title)}</div>
+                        ${p.description ? `<div class="prop-desc">${esc(p.description)}</div>` : ''}
+                        <div class="prop-meta">
+                            <span><span class="material-symbols-outlined">location_on</span>${esc(p.location)}</span>
+                            <span><span class="material-symbols-outlined">bed</span>${esc(p.bhk || '—')}</span>
+                            ${p.created_at ? `<span><span class="material-symbols-outlined">calendar_today</span>${fmtDate(p.created_at)}</span>` : ''}
+                        </div>
+                    </div>
+                </article>`;
+        }
+
+        function renderProps(container, list, inFav) {
+            container.innerHTML = list.map(p => cardHTML(p, inFav === 'fav')).join('');
+        }
+
+        // ===== LIKES =====
+        async function loadLikes() {
+            if (!user) return;
+            const { data } = await supabase
+                .from('likes')
+                .select('property_id')
+                .eq('user_id', user.id);
+            liked = new Set((data || []).map(l => l.property_id));
+        }
+
+        async function toggleLike(id, btn, inFav) {
+            if (!user) return;
+            const isLiked = liked.has(id);
+            const isDemo = String(id).startsWith('demo-');
+
+            if (isLiked) {
+                liked.delete(id);
+            } else {
+                liked.add(id);
+            }
+
+            if (!isDemo) {
+                if (isLiked) {
+                    await supabase.from('likes').delete().eq('user_id', user.id).eq('property_id', id);
+                } else {
+                    await supabase.from('likes').insert({ user_id: user.id, property_id: id });
+                }
+            }
+
+            btn.classList.toggle('liked', !isLiked);
+            btn.querySelector('.material-symbols-outlined').textContent = isLiked ? 'favorite_border' : 'favorite';
+            if (inFav) renderFavorites();
+        }
+
+        function switchToFavorites() {
+            switchTab('favorites');
+            renderFavorites();
+        }
+
+        function renderFavorites() {
+            const favs = allProperties.filter(p => liked.has(p.id));
+            renderProps($('favorites-list'), favs, 'fav');
+            $('empty-favs').style.display = favs.length ? 'none' : 'flex';
+        }
+
+        // ===== LOGOUT =====
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        // ===== TOAST =====
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>

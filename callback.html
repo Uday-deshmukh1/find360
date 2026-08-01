@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="theme-color" content="#070c1a"/>
+    <title>Find 360 - Signing you in</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+    <style>
+        .cb-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); padding: 24px; position: relative; overflow: hidden; }
+        .cb-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 340px; }
+        .cb-logo { width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(135deg, var(--primary), #0d9488); display: grid; place-items: center; color: #fff; font-size: 34px; box-shadow: 0 10px 30px rgba(15, 118, 110, 0.3); }
+        .cb-status { font-size: 15px; font-weight: 500; color: var(--ink); }
+        .cb-sub { font-size: 13px; color: var(--muted); }
+        .cb-error { font-size: 13.5px; color: var(--error); display: none; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="cb-page">
+        <div class="cb-card anim-fade-up">
+            <div class="cb-logo"><span class="material-symbols-outlined">explore</span></div>
+            <div class="spinner"></div>
+            <p class="cb-status" id="status">Signing you in...</p>
+            <p class="cb-sub">Just a moment.</p>
+            <p class="cb-error" id="error"></p>
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const errorEl = document.getElementById('error');
+        const subEl = document.querySelector('.cb-sub');
+
+        function showError(msg) {
+            statusEl.style.display = 'none';
+            subEl.style.display = 'none';
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+            setTimeout(() => window.location.href = 'index.html', 3200);
+        }
+
+        function go(url) {
+            setTimeout(() => window.location.href = url, 350);
+        }
+
+        async function handle() {
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError || !session) {
+                    showError('No active session. Please sign in again.');
+                    return;
+                }
+
+                const user = session.user;
+                statusEl.textContent = 'Setting up your account...';
+
+                let { data: rec } = await supabase
+                    .from('users')
+                    .select('id, role, banned')
+                    .eq('id', user.id)
+                    .maybeSingle();
+
+                if (!rec) {
+                    const { error: insertError } = await supabase
+                        .from('users')
+                        .insert({
+                            id: user.id,
+                            name: user.user_metadata?.full_name || user.user_metadata?.name || 'User',
+                            email: user.email,
+                            profile_photo_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
+                            created_at: new Date().toISOString()
+                        });
+                    if (insertError) {
+                        console.error('Profile insert error:', insertError);
+                    }
+                    rec = await supabase
+                        .from('users')
+                        .select('role, banned')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                }
+
+                const r = rec?.data || rec;
+                const role = r?.role || 'user';
+
+                if (r?.banned) {
+                    await supabase.auth.signOut();
+                    showError('Your account has been banned by the admin.');
+                    return;
+                }
+
+                statusEl.textContent = role === 'admin' ? 'Opening dashboard...' : 'Welcome!';
+                go(role === 'admin' ? 'admin.html' : 'app.html');
+            } catch (err) {
+                console.error('Callback error:', err);
+                showError('Something went wrong. Please try again.');
+            }
+        }
+
+        handle();
+    </script>
+</body>
+</html>
