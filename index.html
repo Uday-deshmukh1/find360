@@ -125,6 +125,19 @@
         }
         checkSetup();
 
+        if (location.hash.indexOf('access_token') !== -1 || location.hash.indexOf('error=') !== -1) {
+            (async function () {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        window.location.replace('callback.html');
+                        return;
+                    }
+                } catch (e) {}
+                history.replaceState(null, '', location.pathname + location.search);
+            })();
+        }
+
         function setMode(m) {
             mode = m;
             $('tab-signin').classList.toggle('on', m === 'signin');
