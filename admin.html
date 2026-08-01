@@ -177,8 +177,15 @@
                     <textarea class="input" id="f-desc" placeholder="Short description of the property"></textarea>
                 </div>
                 <div class="field">
-                    <label for="f-images">Image URLs (comma separated)</label>
-                    <textarea class="input" id="f-images" placeholder="https://.../1.jpg, https://.../2.jpg" style="min-height:64px;"></textarea>
+                    <label for="f-images">Photos</label>
+                    <div class="upload-row">
+                        <button class="btn btn-ghost btn-sm" type="button" id="upload-btn">
+                            <span class="material-symbols-outlined">add_photo_alternate</span> Upload photos
+                        </button>
+                        <input type="file" id="upload-input" accept="image/*" multiple style="display:none;"/>
+                    </div>
+                    <div class="upload-preview" id="upload-preview"></div>
+                    <textarea class="input" id="f-images" placeholder="Or paste image URLs, comma separated" style="min-height:64px;"></textarea>
                 </div>
                 <label class="switch">
                     <input type="checkbox" id="f-verified"/>
@@ -206,6 +213,64 @@
 
         const ROLES = ['user', 'agent', 'admin'];
         const STATUS_BADGE = { pending: 'violet', approved: 'green', rejected: 'red' };
+
+        const CLOUD_NAME = 'qqqx8zqw';
+        const UPLOAD_PRESET = 'find360_unsigne';
+
+        $('upload-btn').addEventListener('click', () => $('upload-input').click());
+
+        $('upload-input').addEventListener('change', async (e) => {
+            const files = [...e.target.files];
+            if (!files.length) return;
+            const btn = $('upload-btn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+            for (const f of files) {
+                try {
+                    const url = await uploadToCloudinary(f);
+                    addImageUrl(url);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Upload failed: ' + err.message);
+                }
+            }
+            btn.disabled = false;
+            btn.textContent = ' Upload photos';
+            e.target.value = '';
+        });
+
+        async function uploadToCloudinary(file) {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', UPLOAD_PRESET);
+            const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/image/upload', { method: 'POST', body: fd });
+            if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+            const data = await res.json();
+            return data.secure_url;
+        }
+
+        function addImageUrl(url) {
+            const box = $('f-images');
+            const cur = box.value.split(',').map(s => s.trim()).filter(Boolean);
+            cur.push(url);
+            box.value = cur.join(', ');
+            renderUploadPreview();
+        }
+
+        function removeImageUrl(i) {
+            const box = $('f-images');
+            const cur = box.value.split(',').map(s => s.trim()).filter(Boolean);
+            cur.splice(i, 1);
+            box.value = cur.join(', ');
+            renderUploadPreview();
+        }
+
+        function renderUploadPreview() {
+            const urls = $('f-images').value.split(',').map(s => s.trim()).filter(Boolean);
+            $('upload-preview').innerHTML = urls.map((u, i) =>
+                '<div class="up-chip"><img src="' + esc(u) + '" alt=""/><button type="button" onclick="removeImageUrl(' + i + ')">&times;</button></div>'
+            ).join('');
+        }
 
         function esc(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -394,6 +459,7 @@
             $('f-location').value = p?.location || '';
             $('f-desc').value = p?.description || '';
             $('f-images').value = (p?.image_urls || []).join(', ');
+            renderUploadPreview();
             $('f-verified').checked = !!p?.verified;
             $('overlay').classList.add('show');
         }
