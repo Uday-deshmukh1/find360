@@ -311,7 +311,9 @@ tbody tr:hover td { background: rgba(45, 212, 191, 0.04); }
 .switch span { font-size: 14px; font-weight: 500; }
 
 /* ================= RESPONSIVE ================= */
+.mobile-brand { display: none; }
 @media (max-width: 900px) {
+    .mobile-brand { display: block; margin-bottom: 20px; }
     .auth-wrap { grid-template-columns: 1fr; max-width: 440px; }
     .auth-brand { display: none; }
     .auth-col { padding: 44px 28px; }

@@ -37,8 +37,11 @@
 
         <section class="auth-col">
             <div class="auth-card">
-                <h2 class="anim-fade-up" id="auth-title">Welcome back</h2>
-                <p class="auth-sub anim-fade-up anim-fade-up-1" id="auth-sub">Sign in to continue finding your place.</p>
+                <div class="mobile-brand anim-fade-up">
+                    <span class="brand-kicker">Find 360</span>
+                </div>
+                <h2 class="anim-fade-up" id="auth-title">This is Find 360</h2>
+                <p class="auth-sub anim-fade-up anim-fade-up-1" id="auth-sub">You can find here properties, medicine, groceries here.</p>
 
                 <div class="setup-note anim-fade-up anim-fade-up-1" id="setup-note"></div>
 
@@ -142,9 +145,9 @@
             mode = m;
             $('tab-signin').classList.toggle('on', m === 'signin');
             $('tab-signup').classList.toggle('on', m === 'signup');
-            $('auth-title').textContent = m === 'signin' ? 'Welcome back' : 'Create your account';
+            $('auth-title').textContent = m === 'signin' ? 'This is Find 360' : 'Create your account';
             $('auth-sub').textContent = m === 'signin'
-                ? 'Sign in to continue finding your place.'
+                ? 'You can find here properties, medicine, groceries here.'
                 : 'Join free and start exploring today.';
             $('auth-btn').textContent = m === 'signin' ? 'Sign in' : 'Create account';
             $('password').autocomplete = m === 'signin' ? 'current-password' : 'new-password';
