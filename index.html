@@ -63,13 +63,21 @@
                 </div>
 
                 <form id="auth-form" class="anim-fade-up anim-fade-up-3" style="display:flex;flex-direction:column;gap:14px;">
-                    <div class="field">
+                    <div class="field" id="email-field">
                         <label for="email">Email</label>
                         <input class="input" id="email" type="email" autocomplete="email" placeholder="you@example.com" required/>
                     </div>
-                    <div class="field">
+                    <div class="field" id="password-field">
                         <label for="password">Password</label>
                         <input class="input" id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" minlength="6" required/>
+                    </div>
+                    <div class="field" id="otp-field" style="display:none;">
+                        <label for="login-otp">Enter OTP sent to your email</label>
+                        <div style="display:flex;gap:8px;">
+                            <input class="input" id="login-otp" placeholder="6-digit OTP" required/>
+                            <button type="button" class="btn btn-ghost" id="login-verify-btn" onclick="verifyLoginOTP()">Verify</button>
+                        </div>
+                        <button type="button" class="btn-link" id="resend-otp-btn" onclick="resendLoginOTP()" style="display:none;margin-top:6px;font-size:13px;color:var(--primary);background:none;border:none;cursor:pointer;">Resend OTP</button>
                     </div>
                     <p class="auth-status" id="auth-status" role="status"></p>
                     <button class="btn btn-primary" id="auth-btn" type="submit">Sign in</button>
@@ -182,8 +190,15 @@
             }
         });
 
+        let pendingEmail = '';
+        let loginOtpStored = '';
+
         $('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if ($('otp-field').style.display !== 'none') {
+                verifyLoginOTP();
+                return;
+            }
             const email = $('email').value.trim();
             const password = $('password').value;
             const btn = $('auth-btn');
@@ -200,7 +215,8 @@
                     btn.textContent = 'Sign in';
                     return;
                 }
-                window.location.href = 'callback.html';
+                pendingEmail = email;
+                sendLoginOTP(email);
             } else {
                 const { data, error } = await supabase.auth.signUp({
                     email, password,
@@ -213,22 +229,51 @@
                     return;
                 }
                 if (data.session) {
-                    window.location.href = 'callback.html';
+                    pendingEmail = email;
+                    sendLoginOTP(email);
                 } else {
                     setStatus('Confirmation email sent. Click the link, then sign in.', 'ok');
-                    setSetupNote('warn',
-                        'No email arrived? Supabase &rarr; Authentication &rarr; Providers &rarr; Email &rarr; turn off <b>Confirm email</b> for instant sign-in.');
                     btn.disabled = false;
                     btn.textContent = 'Create account';
                 }
             }
             } catch (err) {
                 console.error('Auth error:', err);
-                setStatus(err.message || 'Something went wrong. Check your internet connection.', 'err');
+                setStatus(err.message || 'Something went wrong.', 'err');
                 btn.disabled = false;
                 btn.textContent = mode === 'signin' ? 'Sign in' : 'Create account';
             }
         });
+
+        function sendLoginOTP(email) {
+            loginOtpStored = Math.floor(100000 + Math.random() * 900000).toString();
+            localStorage.setItem('login_otp', loginOtpStored);
+            localStorage.setItem('login_otp_email', email);
+            $('email-field').style.display = 'none';
+            $('password-field').style.display = 'none';
+            $('otp-field').style.display = 'block';
+            $('auth-btn').textContent = 'Verify & Continue';
+            $('auth-btn').disabled = false;
+            $('resend-otp-btn').style.display = 'none';
+            setStatus('OTP sent to ' + email, 'ok');
+            alert('Your OTP is: ' + loginOtpStored + '\n\n(Integrate Brevo API for production)');
+            setTimeout(() => { $('resend-otp-btn').style.display = 'block'; }, 30000);
+        }
+
+        function resendLoginOTP() {
+            sendLoginOTP(pendingEmail);
+        }
+
+        async function verifyLoginOTP() {
+            const entered = $('login-otp').value.trim();
+            const stored = localStorage.getItem('login_otp');
+            if (!entered) { setStatus('Enter OTP', 'err'); return; }
+            if (entered !== stored) { setStatus('Invalid OTP', 'err'); return; }
+            localStorage.removeItem('login_otp');
+            localStorage.removeItem('login_otp_email');
+            setStatus('Verified! Redirecting...', 'ok');
+            window.location.href = 'callback.html';
+        }
     </script>
 </body>
 </html>

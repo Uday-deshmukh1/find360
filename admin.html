@@ -77,7 +77,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>Property</th><th>Location</th><th>Price</th><th>Status</th></tr>
+                            <tr><th>Property</th><th>Type</th><th>Price</th><th>Status</th></tr>
                         </thead>
                         <tbody id="recent-table"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:26px;">Loading...</td></tr></tbody>
                     </table>
@@ -106,7 +106,7 @@
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>Property</th><th>Location</th><th>BHK</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+                            <tr><th>Property</th><th>Type</th><th>BHK</th><th>Price</th><th>Status</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="props-table"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:26px;">Loading...</td></tr></tbody>
                     </table>
@@ -147,7 +147,7 @@
             <h3 id="modal-title">List property</h3>
             <p class="muted" id="modal-sub">Your listing goes to the admin for approval</p>
 
-            <div class="form-grid">
+                <div class="form-grid">
                 <div class="field">
                     <label for="f-title">Title</label>
                     <input class="input" id="f-title" placeholder="Spacious 3BHK in Baner" required/>
@@ -158,19 +158,23 @@
                         <input class="input" id="f-price" type="number" min="0" step="10000" placeholder="8500000" required/>
                     </div>
                     <div class="field">
+                        <label for="f-type">Type</label>
+                        <select class="input" id="f-type" required>
+                            <option value="Rent">Rent</option>
+                            <option value="Sell">Sell</option>
+                            <option value="Buy">Buy</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
                         <label for="f-bhk">BHK / Type</label>
                         <input class="input" id="f-bhk" placeholder="3 BHK, Plot, Villa"/>
                     </div>
-                </div>
-                <div class="field">
-                    <label for="f-location">Location</label>
-                    <input class="input" id="f-location" list="loc-suggest" placeholder="City or locality" required/>
-                    <datalist id="loc-suggest">
-                        <option value="Pune"></option><option value="Mumbai"></option><option value="Delhi"></option>
-                        <option value="Bangalore"></option><option value="Hyderabad"></option><option value="Chennai"></option>
-                        <option value="Kolkata"></option><option value="Ahmedabad"></option><option value="Jaipur"></option>
-                        <option value="Nagpur"></option><option value="Nashik"></option><option value="Aurangabad"></option>
-                    </datalist>
+                    <div class="field">
+                        <label for="f-location">Location</label>
+                        <input class="input" id="f-location" placeholder="City or locality" required/>
+                    </div>
                 </div>
                 <div class="field">
                     <label for="f-desc">Description</label>
@@ -387,7 +391,7 @@
             tb.innerHTML = data.map(p => `
                 <tr>
                     <td class="tcell-strong">${esc(p.title)}</td>
-                    <td>${esc(p.location)}</td>
+                    <td>${esc(p.property_type || '—')}</td>
                     <td>${formatPrice(p.price)}</td>
                     <td><span class="badge-pill ${STATUS_BADGE[p.status] || 'gray'}">${esc(p.status || 'pending')}</span></td>
                 </tr>`).join('');
@@ -410,7 +414,7 @@
         function renderProps() {
             const q = ($('prop-search').value || '').toLowerCase();
             const list = allProps.filter(p =>
-                !q || (p.title || '').toLowerCase().includes(q) || (p.location || '').toLowerCase().includes(q)
+                !q || (p.title || '').toLowerCase().includes(q) || (p.property_type || '').toLowerCase().includes(q)
             );
             const tb = $('props-table');
             const isAdmin = role === 'admin';
@@ -430,7 +434,7 @@
                 return `
                 <tr>
                     <td class="tcell-strong">${esc(p.title)}</td>
-                    <td>${esc(p.location)}</td>
+                    <td>${esc(p.property_type || '—')}</td>
                     <td>${esc(p.bhk || '—')}</td>
                     <td>${formatPrice(p.price)}</td>
                     <td><span class="badge-pill ${STATUS_BADGE[p.status] || 'gray'}">${esc(p.status || 'pending')}</span></td>
@@ -455,6 +459,7 @@
             $('modal-sub').textContent = p ? 'Update your listing (it goes back to pending)' : 'Your listing goes to the admin for approval';
             $('f-title').value = p?.title || '';
             $('f-price').value = p?.price || '';
+            $('f-type').value = p?.property_type || 'Sell';
             $('f-bhk').value = p?.bhk || '';
             $('f-location').value = p?.location || '';
             $('f-desc').value = p?.description || '';
@@ -473,6 +478,7 @@
         async function saveProperty() {
             const title = $('f-title').value.trim();
             const price = parseInt($('f-price').value, 10);
+            const property_type = $('f-type').value;
             const location = $('f-location').value.trim();
             if (!title || !price || !location) {
                 showToast('Title, price and location are required.');
@@ -484,6 +490,7 @@
             const payload = {
                 title,
                 price,
+                property_type,
                 location,
                 bhk: $('f-bhk').value.trim(),
                 description: $('f-desc').value.trim(),
