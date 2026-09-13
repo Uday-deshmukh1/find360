@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="theme-color" content="#070c1a"/>
+    <title>Find 360 - Sign in</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+</head>
+<body class="auth-page">
+    <a href="index.html" class="page-back-btn" title="Back to Home">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <div class="aurora" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <main class="auth-wrap">
+        <section class="auth-brand">
+            <span class="brand-kicker">Find 360</span>
+            <h1 class="brand-title">Everything around you,<br/><em>all in one place.</em></h1>
+            <p class="brand-sub">Discover verified properties near you, save your favorites, and manage listings from a single, beautifully simple dashboard.</p>
+
+            <ul class="brand-points">
+                <li><span class="material-symbols-outlined">home_work</span>Verified homes, plots &amp; villas</li>
+                <li><span class="material-symbols-outlined">favorite</span>Save favorites and revisit anytime</li>
+                <li><span class="material-symbols-outlined">admin_panel_settings</span>Full admin dashboard for listings</li>
+            </ul>
+
+            <div class="brand-foot">Free &middot; Private &middot; Built for everyone</div>
+        </section>
+
+        <section class="auth-col">
+            <div class="auth-card">
+                <div class="mobile-brand anim-fade-up">
+                    <span class="brand-kicker">Find 360</span>
+                </div>
+                <h2 class="anim-fade-up" id="auth-title">This is Find 360</h2>
+                <p class="auth-sub anim-fade-up anim-fade-up-1" id="auth-sub">You can find here properties, medicine, groceries here.</p>
+
+                <div class="setup-note anim-fade-up anim-fade-up-1" id="setup-note"></div>
+
+                <button id="google-btn" class="btn-google anim-fade-up anim-fade-up-2">
+                    <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span id="google-btn-text">Continue with Google</span>
+                </button>
+
+                <div class="divider anim-fade-up anim-fade-up-2"><span>or with email</span></div>
+
+                <div class="tabs anim-fade-up anim-fade-up-2">
+                    <button class="tab-btn on" id="tab-signin" type="button">Sign in</button>
+                    <button class="tab-btn" id="tab-signup" type="button">Create account</button>
+                </div>
+
+                <form id="auth-form" class="anim-fade-up anim-fade-up-3" style="display:flex;flex-direction:column;gap:14px;">
+                    <div class="field" id="email-field">
+                        <label for="email">Email</label>
+                        <input class="input" id="email" type="email" autocomplete="email" placeholder="you@example.com" required/>
+                    </div>
+                    <div class="field" id="password-field">
+                        <label for="password">Password</label>
+                        <input class="input" id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" minlength="6" required/>
+                    </div>
+                    <div class="field" id="otp-field" style="display:none;">
+                        <label for="login-otp">Enter OTP sent to your email</label>
+                        <div style="display:flex;gap:8px;">
+                            <input class="input" id="login-otp" placeholder="6-digit OTP" required/>
+                            <button type="button" class="btn btn-ghost" id="login-verify-btn" onclick="verifyLoginOTP()">Verify</button>
+                        </div>
+                        <button type="button" class="btn-link" id="resend-otp-btn" onclick="resendLoginOTP()" style="display:none;margin-top:6px;font-size:13px;color:var(--primary);background:none;border:none;cursor:pointer;">Resend OTP</button>
+                    </div>
+                    <p class="auth-status" id="auth-status" role="status"></p>
+                    <button class="btn btn-primary" id="auth-btn" type="submit">Sign in</button>
+                </form>
+
+                <p class="auth-hint">Everyone can list their own property — the admin approves it before it goes live. The first account ever created becomes the admin.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+        }
+        if (window.caches) {
+            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+        }
+
+        const $ = (id) => document.getElementById(id);
+        let mode = 'signin';
+
+        function callbackURL() {
+            const p = window.location.pathname;
+            const base = p.substring(0, p.lastIndexOf('/') + 1);
+            return window.location.origin + base + 'callback.html';
+        }
+
+        function setStatus(msg, type) {
+            $('auth-status').textContent = msg || '';
+            $('auth-status').className = 'auth-status ' + (type || '');
+        }
+
+        function setSetupNote(type, html) {
+            const note = $('setup-note');
+            note.className = 'setup-note show ' + type;
+            note.innerHTML = '<span class="material-symbols-outlined">info</span><span>' + html + '</span>';
+        }
+
+        async function checkSetup() {
+            if (location.protocol === 'file:') {
+                setSetupNote('err',
+                    'You opened the file directly. In the CEP folder run <code>python -m http.server 3000</code>, then open <code>http://localhost:3000</code>.');
+                return;
+            }
+            try {
+                const { error } = await supabase.from('properties').select('id').limit(1);
+                if (error && (error.code === 'PGRST204' || error.code === '42P01')) {
+                    setSetupNote('warn',
+                        'Database is not ready. Open <b>Supabase &rarr; SQL Editor</b>, paste the contents of <code>schema.sql</code>, and click <b>Run</b>.');
+                } else if (error && error.code === 'PGRST301') {
+                    setSetupNote('err', 'Cannot reach your Supabase project. Check <code>supabase-config.js</code>.');
+                }
+            } catch (e) {
+                setSetupNote('err', 'Connection failed. Are you running this through a local server (http://localhost:3000)?');
+            }
+        }
+        checkSetup();
+
+        if (location.hash.indexOf('access_token') !== -1 || location.hash.indexOf('error=') !== -1) {
+            (async function () {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        window.location.replace('callback.html');
+                        return;
+                    }
+                } catch (e) {}
+                history.replaceState(null, '', location.pathname + location.search);
+            })();
+        }
+
+        function setMode(m) {
+            mode = m;
+            $('tab-signin').classList.toggle('on', m === 'signin');
+            $('tab-signup').classList.toggle('on', m === 'signup');
+            $('auth-title').textContent = m === 'signin' ? 'This is Find 360' : 'Create your account';
+            $('auth-sub').textContent = m === 'signin'
+                ? 'You can find here properties, medicine, groceries here.'
+                : 'Join free and start exploring today.';
+            $('auth-btn').textContent = m === 'signin' ? 'Sign in' : 'Create account';
+            $('password').autocomplete = m === 'signin' ? 'current-password' : 'new-password';
+            setStatus('');
+        }
+
+        $('tab-signin').addEventListener('click', () => setMode('signin'));
+        $('tab-signup').addEventListener('click', () => setMode('signup'));
+
+        $('google-btn').addEventListener('click', async () => {
+            const btn = $('google-btn');
+            btn.disabled = true;
+            $('google-btn-text').textContent = 'Redirecting...';
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: callbackURL() }
+                });
+                if (error) throw error;
+                if (data && data.url) {
+                    window.location.href = data.url;
+                    return;
+                }
+                throw new Error('Supabase returned no redirect URL.');
+            } catch (err) {
+                console.error('OAuth error:', err);
+                btn.disabled = false;
+                $('google-btn-text').textContent = 'Continue with Google';
+                setStatus(err.message || 'Google sign-in failed', 'err');
+                setSetupNote('warn',
+                    'Add <code>' + callbackURL() + '</code> to Supabase &rarr; Authentication &rarr; URL Configuration &rarr; <b>Redirect URLs</b>.');
+            }
+        });
+
+        let pendingEmail = '';
+        let loginOtpStored = '';
+
+        $('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if ($('otp-field').style.display !== 'none') {
+                verifyLoginOTP();
+                return;
+            }
+            const email = $('email').value.trim();
+            const password = $('password').value;
+            const btn = $('auth-btn');
+            btn.disabled = true;
+            btn.textContent = mode === 'signin' ? 'Signing in...' : 'Creating account...';
+            setStatus('');
+
+            try {
+            if (mode === 'signin') {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    setStatus(error.message, 'err');
+                    btn.disabled = false;
+                    btn.textContent = 'Sign in';
+                    return;
+                }
+                pendingEmail = email;
+                sendLoginOTP(email);
+            } else {
+                const { data, error } = await supabase.auth.signUp({
+                    email, password,
+                    options: { data: { full_name: email.split('@')[0] } }
+                });
+                if (error) {
+                    setStatus(error.message, 'err');
+                    btn.disabled = false;
+                    btn.textContent = 'Create account';
+                    return;
+                }
+                if (data.session) {
+                    pendingEmail = email;
+                    sendLoginOTP(email);
+                } else {
+                    setStatus('Confirmation email sent. Click the link, then sign in.', 'ok');
+                    btn.disabled = false;
+                    btn.textContent = 'Create account';
+                }
+            }
+            } catch (err) {
+                console.error('Auth error:', err);
+                setStatus(err.message || 'Something went wrong.', 'err');
+                btn.disabled = false;
+                btn.textContent = mode === 'signin' ? 'Sign in' : 'Create account';
+            }
+        });
+
+        function sendLoginOTP(email) {
+            loginOtpStored = Math.floor(100000 + Math.random() * 900000).toString();
+            localStorage.setItem('login_otp', loginOtpStored);
+            localStorage.setItem('login_otp_email', email);
+            $('email-field').style.display = 'none';
+            $('password-field').style.display = 'none';
+            $('otp-field').style.display = 'block';
+            $('auth-btn').textContent = 'Verify & Continue';
+            $('auth-btn').disabled = false;
+            $('resend-otp-btn').style.display = 'none';
+            setStatus('OTP sent to ' + email, 'ok');
+            alert('Your OTP is: ' + loginOtpStored + '\n\n(Integrate Brevo API for production)');
+            setTimeout(() => { $('resend-otp-btn').style.display = 'block'; }, 30000);
+        }
+
+        function resendLoginOTP() {
+            sendLoginOTP(pendingEmail);
+        }
+
+        async function verifyLoginOTP() {
+            const entered = $('login-otp').value.trim();
+            const stored = localStorage.getItem('login_otp');
+            if (!entered) { setStatus('Enter OTP', 'err'); return; }
+            if (entered !== stored) { setStatus('Invalid OTP', 'err'); return; }
+            localStorage.removeItem('login_otp');
+            localStorage.removeItem('login_otp_email');
+            setStatus('Verified! Redirecting...', 'ok');
+            window.location.href = 'callback.html';
+        }
+    </script>
+</body>
+</html>

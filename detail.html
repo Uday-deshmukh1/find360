@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+    <title>Find 360 - Property Detail</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "on-surface": "#dfe2f1",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "secondary-container": "#ee9800",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-primary-fixed-variant": "#005236",
+                    "primary": "#4edea3",
+                    "tertiary-fixed": "#85f8c4",
+                    "on-secondary-fixed": "#2a1700",
+                    "surface-container-highest": "#313540",
+                    "on-tertiary-fixed": "#002114",
+                    "surface-container": "#1c1f2a",
+                    "on-secondary": "#472a00",
+                    "on-error-container": "#ffdad6",
+                    "primary-container": "#10b981",
+                    "on-tertiary-fixed-variant": "#005137",
+                    "secondary-fixed": "#ffddb8",
+                    "tertiary-fixed-dim": "#68dba9",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#0a0e18",
+                    "surface-variant": "#313540",
+                    "tertiary": "#68dba9",
+                    "surface-tint": "#4edea3",
+                    "on-primary": "#003824",
+                    "inverse-on-surface": "#2c303b",
+                    "on-secondary-container": "#5b3800",
+                    "surface-bright": "#353944",
+                    "surface-dim": "#0f131d",
+                    "surface-container-high": "#262a35",
+                    "on-tertiary": "#003825",
+                    "background": "#0f131d",
+                    "on-tertiary-container": "#00422c",
+                    "surface-container-low": "#171b26",
+                    "secondary": "#ffb95f",
+                    "on-error": "#690005",
+                    "primary-fixed": "#6ffbbe",
+                    "on-background": "#dfe2f1",
+                    "inverse-primary": "#006c49",
+                    "tertiary-container": "#3eb686",
+                    "on-primary-container": "#00422b",
+                    "surface": "#0f131d",
+                    "inverse-surface": "#dfe2f1",
+                    "on-primary-fixed": "#002113",
+                    "outline": "#86948a",
+                    "outline-variant": "#3c4a42",
+                    "on-surface-variant": "#bbcabf"
+                },
+                "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                "spacing": { "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "1rem", "space-lg": "1.5rem", "gutter-desktop": "1.5rem", "margin-desktop": "2rem", "margin": "1rem", "space-xl": "2rem", "gutter": "1rem" },
+                "fontFamily": {
+                    "label-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"], "title-lg": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"]
+                },
+                "fontSize": {
+                    "label-lg": ["14px", { "lineHeight": "18px", "fontWeight": "600" }],
+                    "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                    "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                    "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "700" }],
+                    "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                    "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                    "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                    "title-lg": ["16px", { "lineHeight": "22px", "fontWeight": "600" }],
+                    "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                    "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "display-lg": ["40px", { "lineHeight": "48px", "fontWeight": "700" }],
+                    "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                }
+            }
+        }
+    };
+    </script>
+    <style>
+        @layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } }
+        ::-webkit-scrollbar { display: none; }
+        .leaflet-control-attribution { display: none !important; }
+        .leaflet-control-zoom { display: none !important; }
+        .gw-loading { text-align: center; padding: 30px 0; }
+        .gw-spinner { width: 56px; height: 56px; border: 4px solid #222c44; border-top-color: #14b8a6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .gw-loading h3 { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+        .gw-loading p { font-size: 13px; color: #94a3b8; }
+        .gw-success { text-align: center; padding: 30px 0; }
+        .gw-check .material-symbols-outlined { font-size: 64px; color: #22c55e; animation: popIn 0.4s ease; }
+        .gw-success h3 { font-size: 20px; font-weight: 700; color: #e2e8f0; margin: 12px 0 6px; }
+        .gw-success p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        .pay-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .pay-box { background: #0f1626; border: 1px solid #222c44; border-radius: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; position: relative; padding: 28px; }
+        .pay-close { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.06); border: 1px solid #222c44; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer; color: #94a3b8; }
+        .pay-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .pay-head { text-align: center; margin-bottom: 24px; }
+        .pay-head-icon { font-size: 44px; color: #14b8a6; display: block; margin-bottom: 8px; }
+        .pay-head h2 { font-size: 20px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+        .pay-head p { font-size: 13px; color: #94a3b8; }
+        .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .pay-method { background: rgba(255,255,255,0.03); border: 2px solid #222c44; border-radius: 14px; padding: 20px 12px; text-align: center; cursor: pointer; transition: 0.2s; color: #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+        .pay-method:hover { border-color: #14b8a6; transform: translateY(-3px); background: rgba(20,184,166,0.06); }
+        .pay-logo-box { width: 52px; height: 52px; display: grid; place-items: center; }
+        .pay-confirm-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #14b8a6, #0d9488); color: #04211c; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .pay-confirm-btn:hover { filter: brightness(1.1); }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+</head>
+<body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen">
+    <header class="fixed top-0 w-full z-50 pt-safe bg-surface-dim/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]">
+        <div class="h-16 px-margin flex items-center justify-between">
+            <div class="flex items-center gap-space-sm flex-1 min-w-0 pr-space-sm">
+                <button aria-label="Go back" class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" onclick="window.history.length > 1 ? window.history.back() : window.location.href='app.html'">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                </button>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-title-lg text-title-lg text-on-surface truncate font-semibold">Property Detail</span>
+                    <div class="flex items-center gap-space-xs">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Active Tour 360</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-space-xs flex-shrink-0">
+                <button aria-label="Share property" class="w-11 h-11 flex items-center justify-center rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" onclick="shareProperty()">
+                    <span class="material-symbols-outlined text-[20px]">share</span>
+                </button>
+                <button aria-label="Save to favorites" class="w-11 h-11 flex items-center justify-center rounded-full bg-surface-container text-secondary hover:bg-surface-container-high transition-colors" onclick="toggleFav()">
+                    <span class="material-symbols-outlined text-[20px]" id="favIcon">favorite_border</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex flex-col relative w-full pt-16 pb-28 bg-surface flex-1" id="detail-main"></main>
+
+    <aside class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-low/95 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
+        <div class="h-20 px-margin flex items-center gap-space-md">
+            <div class="flex items-center gap-space-sm flex-shrink-0">
+                <div class="relative">
+                    <div class="w-11 h-11 rounded-full bg-surface-container-high flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-[24px]">real_estate_agent</span>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary ring-2 ring-surface-container-low"></span>
+                </div>
+                <button aria-label="Quick chat" class="w-11 h-11 flex items-center justify-center rounded-xl bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors" onclick="openSubModal()">
+                    <span class="material-symbols-outlined text-[20px]">chat</span>
+                </button>
+            </div>
+            <button class="flex-1 h-12 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-lg text-title-lg font-bold flex items-center justify-center gap-space-xs shadow-[0_0_24px_-4px_rgba(16,185,129,0.3)] transition-all active:scale-[0.98]" onclick="openSubModal()">
+                <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                <span>Contact Owner</span>
+            </button>
+        </div>
+    </aside>
+
+    <script>
+        const DEMO = [
+            { id: 'demo-rent-1', title: 'Spacious 2BHK Apartment for Rent', price: 25000, property_type: 'Rent', bhk: '2 BHK', location: 'Navsari, Amaravati', description: 'Discover effortless luxury in this meticulously furnished 2BHK flat set inside a prestigious gated enclave in Navsari, Amaravati. Featuring contemporary teak woodwork, 55-inch smart TV, premium L-shaped sofa, orthotic spring mattresses, water purifier, modular kitchen with chimney, and energy-efficient inverter air conditioners in both bedrooms. Enjoy high floor cross-ventilation, expansive balcony cityscapes, and an effortless walk to the nearest metro corridor.', image_urls: ['pic/rent/a1.jpeg', 'pic/rent/a2.jpeg', 'pic/rent/a3.jpeg', 'pic/rent/a4.jpeg', 'pic/rent/a5.jpeg', 'pic/rent/a6.jpeg'], verified: true, owner_name: 'Rajesh Kumar', owner_email: 'rajesh.kumar@email.com', owner_mobile: '+91 9876543210', amenities: ['Covered Car Parking', '24/7 Security & CCTV', '100% Power Backup', 'High-Speed Wi-Fi', 'Dual Split ACs', 'Fridge & Chimney', 'Gym & Clubhouse', 'Swimming Pool', 'High-Speed Elevators'] },
+            { id: 'demo-rent-2', title: 'Furnished 1BHK for Singles', price: 12000, property_type: 'Rent', bhk: '1 BHK', location: 'Gadge Nagar, Amaravati', description: 'Compact 1BHK in Gadge Nagar, fully furnished with bed, sofa, wardrobe, AC. Ideal for working professionals. 2 min walk to Gadge Nagar bus stop. Monthly maintenance included.', image_urls: ['pic/rent/b1.jpg', 'pic/rent/b2.jpg', 'pic/rent/b3.jpg', 'pic/rent/b4.jpg'], verified: true, owner_name: 'Kavitha Patil', owner_email: 'kavitha.p@email.com', owner_mobile: '+91 9876511111', amenities: ['Furnished', 'AC', 'WiFi', 'Near Bus Stop', 'Water Included', 'Maintenance Included'] },
+            { id: 'demo-rent-3', title: 'Premium 3BHK Family Home', price: 35000, property_type: 'Rent', bhk: '3 BHK', location: 'VMV Road, Amaravati', description: 'Spacious 3BHK on VMV Road with master bedroom ensuite, modular kitchen, dining area, two balconies. Covered car parking for 2 cars. Near Apollo Hospital and VMV shopping complex.', image_urls: ['pic/rent/c1.jpg', 'pic/rent/c2.jpg', 'pic/rent/c3.jpg'], verified: true, owner_name: 'Srinivas Goud', owner_email: 'srinivas.g@email.com', owner_mobile: '+91 9876522222', amenities: ['2 Car Parking', 'Modular Kitchen', '2 Balconies', 'Near Hospital', 'Near Shopping', '24/7 Water'] },
+            { id: 'demo-rent-4', title: 'Modern 2BHK near Capital', price: 22000, property_type: 'Rent', bhk: '2 BHK', location: 'Tadepalli, Amaravati', description: 'Newly constructed 2BHK in Tadepalli with modern fittings, east-facing, good ventilation. Near Amaravati capital secretariat. Ideal for government employees.', image_urls: ['pic/rent/d1.jpg', 'pic/rent/d2.jpg'], verified: true, owner_name: 'Lakshmi Devi', owner_email: 'lakshmi.d@email.com', owner_mobile: '+91 9876533333', amenities: ['East Facing', 'New Construction', 'Near Secretariat', 'Good Ventilation', 'Covered Parking'] },
+            { id: 'demo-rent-5', title: 'Cozy Studio for Students', price: 8000, property_type: 'Rent', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Affordable studio apartment in Thullur near Amaravati university campus. Furnished with bed, desk, wardrobe, kitchenette. WiFi included. Perfect for students.', image_urls: ['pic/rent/e.jpg'], verified: true, owner_name: 'Ravi Teja', owner_email: 'ravi.teja@email.com', owner_mobile: '+91 9876544444', amenities: ['Fully Furnished', 'WiFi Included', 'Near University', 'Kitchenette', 'Affordable'] },
+            { id: 'demo-rent-6', title: 'Luxury 2BHK with Terrace', price: 28000, property_type: 'Rent', bhk: '2 BHK', location: 'Katora, Amaravati', description: 'Premium 2BHK in Katora with private terrace, modular kitchen, premium fittings. Close to Amaravati bypass road. Ideal for families who enjoy outdoor space.', image_urls: ['pic/rent/f.jpg', 'pic/rent/g.jpg'], verified: true, owner_name: 'Divya Sharma', owner_email: 'divya.s@email.com', owner_mobile: '+91 9876555555', amenities: ['Private Terrace', 'Modular Kitchen', 'Near Bypass Road', 'Premium Fittings', 'Good Connectivity'] },
+            { id: 'demo-rent-7', title: 'Spacious 3BHK Independent Floor', price: 30000, property_type: 'Rent', bhk: '3 BHK', location: 'Mangalagiri, Amaravati', description: 'Independent floor in Mangalagiri with 3BHK, open terrace, car parking. Near Mangalagiri temple and bus stand. Quiet residential area with good connectivity.', image_urls: ['pic/rent/h.jpg', 'pic/rent/i.jpg', 'pic/rent/j.jpg'], verified: true, owner_name: 'Prasad Reddy', owner_email: 'prasad.r@email.com', owner_mobile: '+91 9876566666', amenities: ['Independent Floor', 'Open Terrace', 'Car Parking', 'Near Temple', 'Quiet Area'] },
+            { id: 'demo-rent-8', title: '1BHK near Railway Station', price: 10000, property_type: 'Rent', bhk: '1 BHK', location: 'Amaravati Railway Station', description: 'Affordable 1BHK walking distance from Amaravati railway station. Semi-furnished with basic fittings. Ideal for daily commuters. Water and electricity bill included.', image_urls: ['pic/rent/k.jpg', 'pic/rent/l.jpg'], verified: true, owner_name: 'Manoj Kumar', owner_email: 'manoj.k@email.com', owner_mobile: '+91 9876577777', amenities: ['Near Railway Station', 'Semi Furnished', 'Bills Included', 'Basic Fittings', 'Commuter Friendly'] },
+            { id: 'demo-rent-9', title: 'Premium 2BHK in Gated Community', price: 32000, property_type: 'Rent', bhk: '2 BHK', location: 'Rathi Nagar, Amaravati', description: '2BHK in premium gated community in Rathi Nagar with swimming pool, gym, clubhouse access. Fully furnished with branded appliances. 24/7 security and power backup.', image_urls: ['pic/rent/m.jpg', 'pic/rent/n.jpg', 'pic/rent/o.jpg'], verified: true, owner_name: 'Swapna Nair', owner_email: 'swapna.n@email.com', owner_mobile: '+91 9876588888', amenities: ['Gated Community', 'Swimming Pool', 'Gym', 'Clubhouse', 'Fully Furnished', '24/7 Security'] },
+            { id: 'demo-buy-1', title: 'Premium 3BHK Flat for Sale', price: 8500000, property_type: 'Buy', bhk: '3 BHK', location: 'Gadge Nagar, Amaravati', description: 'East-facing premium flat in Gadge Nagar with high ceiling, Italian marble flooring, premium sanitary fittings. Near Gadge Nagar police station and Amaravati central market. Spacious living room, modular kitchen with chimney, master bedroom with attached bathroom and balcony.', image_urls: ['pic/buy/a1.jpeg', 'pic/buy/a2.jpeg', 'pic/buy/a3.jpeg'], verified: true, owner_name: 'Priya Sharma', owner_email: 'priya.sharma@email.com', owner_mobile: '+91 9123456789', amenities: ['Covered Car Parking', '24/7 Security', 'Power Backup', 'Modular Kitchen', 'False Ceiling', 'Balcony', 'High-Speed Elevator', 'Children Play Area'] },
+            { id: 'demo-buy-2', title: 'Elegant 2BHK Flat for Sale', price: 5200000, property_type: 'Buy', bhk: '2 BHK', location: 'VMV Road, Amaravati', description: 'Well-designed 2BHK on main VMV Road with lift facility, covered car parking, children play area. 5 min drive to Amaravati railway station. Vitrified tile flooring, western style bathroom, UPVC windows. Ideal for first-time home buyers.', image_urls: ['pic/buy/b1.jpeg', 'pic/buy/b2.jpeg'], verified: true, owner_name: 'Amit Patil', owner_email: 'amit.patil@email.com', owner_mobile: '+91 9988776655', amenities: ['Covered Parking', 'Lift', '24/7 Water Supply', 'Security', 'Near Railway Station', 'Near School', 'Near Hospital'] },
+            { id: 'demo-buy-3', title: 'Residential Plot in Developing Area', price: 3500000, property_type: 'Buy', bhk: 'Plot', location: 'Rathi Nagar, Amaravati', description: '1200 sq ft east-facing plot in Rathi Nagar with clear title, CRDA approved layout. 200ft road frontage, electricity and water connection available. Minutes from Amaravati capital city corridor. Ideal for independent house construction.', image_urls: ['pic/buy/land 1.jpeg', 'pic/buy/land2.jpeg'], verified: true, owner_name: 'Sneha Deshmukh', owner_email: 'sneha.d@email.com', owner_mobile: '+91 9012345678', amenities: ['CRDA Approved', 'Clear Title', '200ft Road', 'Electricity', 'Water Connection', 'Near Capital Corridor'] },
+            { id: 'demo-buy-4', title: 'Luxurious 4BHK Independent House', price: 12500000, property_type: 'Buy', bhk: '4 BHK', location: 'Katora, Amaravati', description: 'Spacious 4BHK independent house in Katora with double-height living room, Italian marble, private garden, servant quarter. Corner plot with 3-side open. Near Katora temple and Amaravati bypass road.', image_urls: ['pic/buy/c1.jpg', 'pic/buy/c2.jpg', 'pic/buy/c3.jpg', 'pic/buy/c4.jpg', 'pic/buy/c5.jpg', 'pic/buy/c6.jpg'], verified: true, owner_name: 'Vikram Rao', owner_email: 'vikram.rao@email.com', owner_mobile: '+91 9876512345', amenities: ['Private Garden', 'Servant Quarter', 'Italian Marble', 'Double Height Ceiling', '3-Side Open', 'Corner Plot', 'Bore Well', 'Compound Wall'] },
+            { id: 'demo-buy-5', title: 'Modern Villa with Swimming Pool', price: 18000000, property_type: 'Buy', bhk: 'Villa', location: 'Tadepalli, Amaravati', description: 'Premium villa in Tadepalli gated community with private swimming pool, landscaped garden, modular kitchen, home theatre. 24/7 security, clubhouse access. 10 min from Amaravati capital city.', image_urls: ['pic/buy/d1.jpg', 'pic/buy/d2.jpg', 'pic/buy/d3.jpg', 'pic/buy/d4.jpg', 'pic/buy/d5.jpg', 'pic/buy/d6.jpg', 'pic/buy/d7.jpg'], verified: true, owner_name: 'Meera Reddy', owner_email: 'meera.reddy@email.com', owner_mobile: '+91 9123498765', amenities: ['Private Swimming Pool', 'Home Theatre', 'Landscaped Garden', 'Clubhouse', 'Gated Community', '24/7 Security', 'Modular Kitchen', ' servant Quarter'] },
+            { id: 'demo-buy-6', title: 'Compact 1BHK for Young Professionals', price: 2800000, property_type: 'Buy', bhk: '1 BHK', location: 'Amaravati Capital Zone', description: 'Smart 1BHK apartment in Amaravati Capital Zone, ideal for working professionals. Furnished with modular kitchen, AC, washing machine. Walking distance to secretariat and government offices.', image_urls: ['pic/buy/e1.jpg', 'pic/buy/e2.jpg', 'pic/buy/e3.jpg'], verified: true, owner_name: 'Karthik Nair', owner_email: 'karthik.nair@email.com', owner_mobile: '+91 9988712345', amenities: ['Furnished', 'Modular Kitchen', 'AC', 'Washing Machine', 'Near Secretariat', 'Metro Access', 'Security'] },
+            { id: 'demo-buy-7', title: 'Studio Apartment near Amaravati Hub', price: 1800000, property_type: 'Buy', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Compact studio apartment in Thullur near Amaravati metro hub. Fully furnished with bed, sofa, kitchenette, attached bathroom. Ideal investment property with high rental yield.', image_urls: ['pic/buy/f1.jpg', 'pic/buy/f2.jpg'], verified: true, owner_name: 'Anjali Menon', owner_email: 'anjali.menon@email.com', owner_mobile: '+91 9012398765', amenities: ['Fully Furnished', 'Kitchenette', 'Near Metro', 'High Rental Yield', 'Investment Ready'] },
+            { id: 'demo-buy-8', title: 'Farmhouse with Agricultural Land', price: 4500000, property_type: 'Buy', bhk: 'Farmhouse', location: 'Mangalagiri, Amaravati', description: '2 acre farmhouse with 2BHK constructed house in Mangalagiri. Bore well, drip irrigation, coconut and banana plantation. 15 min from Amaravati, perfect weekend retreat or investment.', image_urls: ['pic/buy/g1.jpg', 'pic/buy/g2.jpg'], verified: true, owner_name: 'Suresh Babu', owner_email: 'suresh.babu@email.com', owner_mobile: '+91 9876598765', amenities: ['2 Acres Land', 'Bore Well', 'Drip Irrigation', 'Plantation', 'Constructed House', 'Weekend Retreat'] }
+        ];
+
+        function formatPrice(n) {
+            if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            if (n >= 100000) return '₹' + (n / 100000).toFixed(1).replace(/\.0$/, '') + ' L';
+            if (n >= 1000) return '₹' + n.toLocaleString('en-IN');
+            return '₹' + n + '/month';
+        }
+
+        function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+        async function loadProperty() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) { document.getElementById('detail-main').innerHTML = '<p class="text-center text-on-surface-variant py-20">Property not found.</p>'; return; }
+
+            let prop = null;
+            if (String(id).startsWith('demo-')) {
+                prop = DEMO.find(p => p.id === id);
+            } else {
+                try {
+                    const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
+                    if (!error && data) prop = data;
+                } catch (e) {}
+            }
+            if (!prop) { document.getElementById('detail-main').innerHTML = '<p class="text-center text-on-surface-variant py-20">Property not found.</p>'; return; }
+            renderDetail(prop);
+        }
+
+        let currentSlide = 0;
+        let totalSlides = 0;
+        let carouselInterval;
+
+        function renderDetail(p) {
+            document.title = 'Find 360 - ' + p.title;
+            const imgs = p.image_urls || [];
+            totalSlides = imgs.length;
+            currentSlide = 0;
+
+            const slidesHtml = imgs.map((url, i) => `
+                <div class="w-full h-full flex-shrink-0 relative">
+                    <img class="w-full h-full object-cover" src="${esc(url)}" alt="${esc(p.title)}"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-surface-container-lowest/40 pointer-events-none"></div>
+                </div>`).join('');
+
+            const dotsHtml = imgs.map((_, i) => `
+                <button aria-label="Slide ${i+1}" class="w-5 h-1.5 rounded-full bg-primary transition-all duration-300 indicator-dot" onclick="goToSlide(${i})"></button>`).join('');
+
+            const priceLabel = p.property_type === 'Rent' ? '/ month' : '';
+            const zeroBrokerage = p.property_type === 'Rent' ? '<span class="inline-flex px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold tracking-wider">ZERO BROKERAGE</span>' : '';
+
+            const amenitiesHtml = (p.amenities || ['Covered Car Parking', '24/7 Security', 'Power Backup', 'High-Speed Wi-Fi', 'Lift', 'Water Supply']).map(a => `
+                <div class="amenity-item p-space-sm rounded-lg bg-surface-container-high flex items-center gap-space-sm" data-cat="all">
+                    <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                    <span class="font-body-sm text-body-sm text-on-surface font-medium truncate">${esc(a)}</span>
+                </div>`).join('');
+
+            const html = `
+                <div class="flex flex-col w-full px-margin space-y-space-md">
+                    <!-- Carousel -->
+                    <div class="relative w-full rounded-xl overflow-hidden bg-surface-container shadow-xl select-none" id="carouselWrapper">
+                        <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden">
+                            <div class="flex w-full h-full transition-transform duration-500 ease-out" id="sliderTrack">${slidesHtml}</div>
+                        </div>
+                        <div class="absolute top-space-sm left-space-sm right-space-sm flex items-center justify-between pointer-events-none">
+                            <div class="flex items-center gap-space-xs pointer-events-auto">
+                                ${p.verified ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/20 backdrop-blur-md text-primary font-label-sm text-label-sm shadow-sm"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: \'FILL\' 1;">verified</span>VERIFIED LISTING</span>' : ''}
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-secondary-container/30 backdrop-blur-md text-secondary font-label-sm text-label-sm"><span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>TOP PICK</span>
+                            </div>
+                            <div class="pointer-events-auto"><span class="px-2.5 py-1 rounded-full bg-surface-container-lowest/80 backdrop-blur-md font-label-sm text-label-sm text-on-surface shadow"><span id="currentSlideNum">1</span> / ${totalSlides} Photos</span></div>
+                        </div>
+                        <div class="absolute bottom-space-md left-space-md pointer-events-auto">
+                            <button class="flex items-center gap-space-xs px-3.5 py-1.5 rounded-full bg-surface-dim/80 backdrop-blur-xl text-on-surface hover:bg-surface-container-high transition-all shadow-lg active:scale-95 group" onclick="alert('Launching 360° interactive walkthrough...')">
+                                <span class="material-symbols-outlined text-primary text-[20px] animate-spin" style="animation-duration: 9s;">360</span>
+                                <span class="font-label-md text-label-md text-on-surface font-semibold tracking-wide">Interactive 360° Tour</span>
+                                <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-space-md right-space-md flex items-center gap-1.5 pointer-events-auto" id="dotContainer">${dotsHtml}</div>
+                    </div>
+
+                    <!-- Property Info Card -->
+                    <div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col space-y-space-sm">
+                        <div class="flex items-start justify-between gap-space-sm">
+                            <div class="flex flex-col min-w-0">
+                                <div class="flex items-baseline gap-space-xs">
+                                    <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">${formatPrice(p.price)}</span>
+                                    ${p.property_type === 'Rent' ? '<span class="font-label-md text-label-md text-on-surface-variant">/ month</span>' : ''}
+                                </div>
+                                <h1 class="font-headline-sm text-headline-sm text-on-surface font-semibold mt-1">${esc(p.title)}</h1>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">${esc(p.location || '')}</p>
+                            </div>
+                            <div class="flex-shrink-0 text-right">${zeroBrokerage}</div>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-space-xs pt-space-xs">
+                            <div class="p-space-sm rounded-lg bg-surface-container-high flex items-center gap-space-xs">
+                                <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-[20px]">bed</span></div>
+                                <div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-on-surface-variant">Configuration</span><span class="font-label-md text-label-md text-on-surface truncate font-semibold">${esc(p.bhk || '—')}</span></div>
+                            </div>
+                            <div class="p-space-sm rounded-lg bg-surface-container-high flex items-center gap-space-xs">
+                                <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-[20px]">category</span></div>
+                                <div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-on-surface-variant">Type</span><span class="font-label-md text-label-md text-on-surface truncate font-semibold">${esc(p.property_type || '—')}</span></div>
+                            </div>
+                            <div class="p-space-sm rounded-lg bg-surface-container-high flex items-center gap-space-xs">
+                                <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-[20px]">chair</span></div>
+                                <div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-on-surface-variant">Furnishing</span><span class="font-label-md text-label-md text-on-surface truncate font-semibold">Fully Furnished</span></div>
+                            </div>
+                            <div class="p-space-sm rounded-lg bg-surface-container-high flex items-center gap-space-xs">
+                                <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined text-[20px]">key</span></div>
+                                <div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-on-surface-variant">Availability</span><span class="font-label-md text-label-md text-on-surface truncate font-semibold">Ready to Move</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col space-y-space-xs">
+                        <h2 class="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-space-xs">
+                            <span class="material-symbols-outlined text-primary text-[20px]">description</span>About this Home
+                        </h2>
+                        <div class="relative">
+                            <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed line-clamp-3" id="descContent">${esc(p.description || '')}</p>
+                            <button class="mt-space-xs font-label-md text-label-md text-primary hover:underline flex items-center gap-1 font-semibold" id="toggleDescBtn" onclick="toggleDesc()">
+                                <span>Read full description</span>
+                                <span class="material-symbols-outlined text-[16px]" id="descArrow">expand_more</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col space-y-space-md">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-space-xs">
+                                <span class="material-symbols-outlined text-primary text-[20px]">apartment</span>Amenities & Inclusions
+                            </h2>
+                            <span class="font-label-sm text-label-sm text-primary">${(p.amenities || []).length || 6} Included</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm" id="amenitiesGrid">${amenitiesHtml}</div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col space-y-space-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-space-xs">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">location_on</span>Neighborhood
+                                </h2>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">${esc(p.location || '')}</p>
+                            </div>
+                        </div>
+                        <div class="relative w-full h-44 rounded-lg overflow-hidden bg-surface-container-high shadow-inner">
+                            <div id="detail-map" style="width:100%;height:100%;border-radius:0.5rem;"></div>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-dim/90 backdrop-blur-md shadow-2xl animate-bounce">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+                                    <span class="font-label-sm text-label-sm text-on-surface font-bold">${esc(p.bhk || '')} • ${formatPrice(p.price)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Owner Card -->
+                    <div class="p-space-md rounded-xl bg-surface-container shadow-md flex flex-col space-y-space-md mb-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-space-sm">
+                                <div class="relative">
+                                    <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-[24px]">person</span>
+                                    </div>
+                                    <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center text-surface text-[9px] font-bold">✓</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-title-lg text-title-lg text-on-surface font-semibold">${esc(p.owner_name || 'Owner')}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-label-sm text-label-sm font-bold">Owner</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-0.5 font-label-sm text-label-sm text-on-surface-variant">
+                                        <span class="flex items-center text-secondary gap-0.5 font-semibold"><span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">star</span>4.9</span>
+                                        <span>•</span>
+                                        <span class="text-primary font-medium">Replies in &lt;15 min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+                            <button class="h-11 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-title-lg text-title-lg font-semibold flex items-center justify-center gap-space-xs transition-all active:scale-95 shadow" onclick="openSubModal()">
+                                <span class="material-symbols-outlined text-primary text-[18px]">chat</span><span class="font-label-lg text-label-lg">WhatsApp</span>
+                            </button>
+                            <button class="h-11 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-title-lg text-title-lg font-semibold flex items-center justify-center gap-space-xs transition-all active:scale-95 shadow" onclick="openSubModal()">
+                                <span class="material-symbols-outlined text-primary text-[18px]">call</span><span class="font-label-lg text-label-lg">Call Owner</span>
+                            </button>
+                        </div>
+                        <div class="p-space-xs rounded-lg bg-surface-container-high/50 flex items-center justify-center gap-1.5 text-center">
+                            <span class="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant">Identity & Property Ownership Verified by Find 360</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detail-main').innerHTML = html;
+            startCarousel();
+            initMap(p.location || 'Amaravati, India');
+        }
+
+        function initMap(location) {
+            const coords = {
+                'Navsari, Amaravati': [20.9517, 77.7606],
+                'Gadge Nagar, Amaravati': [20.9450, 77.7750],
+                'VMV Road, Amaravati': [20.9380, 77.7680],
+                'Rathi Nagar, Amaravati': [20.9550, 77.7820],
+                'Amaravati, India': [20.9517, 77.7606]
+            };
+            const pos = coords[location] || [20.9517, 77.7606];
+            setTimeout(() => {
+                const map = L.map('detail-map', { zoomControl: false, attributionControl: false }).setView(pos, 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+                L.marker(pos).addTo(map).bindPopup('<b>' + location + '</b>').openPopup();
+                setTimeout(() => map.invalidateSize(), 100);
+            }, 200);
+        }
+
+        function startCarousel() {
+            if (totalSlides <= 1) return;
+            carouselInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateCarousel();
+            }, 5000);
+            const wrapper = document.getElementById('carouselWrapper');
+            if (wrapper) {
+                wrapper.addEventListener('mouseenter', () => clearInterval(carouselInterval));
+                wrapper.addEventListener('mouseleave', () => {
+                    carouselInterval = setInterval(() => { currentSlide = (currentSlide + 1) % totalSlides; updateCarousel(); }, 5000);
+                });
+            }
+        }
+
+        function goToSlide(idx) { currentSlide = idx; updateCarousel(); }
+
+        function updateCarousel() {
+            const track = document.getElementById('sliderTrack');
+            const num = document.getElementById('currentSlideNum');
+            const dots = document.querySelectorAll('.indicator-dot');
+            if (track) track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            if (num) num.textContent = currentSlide + 1;
+            dots.forEach((d, i) => {
+                d.className = i === currentSlide
+                    ? "w-5 h-1.5 rounded-full bg-primary transition-all duration-300 indicator-dot"
+                    : "w-1.5 h-1.5 rounded-full bg-on-surface-variant/50 transition-all duration-300 indicator-dot";
+            });
+        }
+
+        let descExpanded = false;
+        function toggleDesc() {
+            const desc = document.getElementById('descContent');
+            const arrow = document.getElementById('descArrow');
+            const btn = document.querySelector('#toggleDescBtn span:first-child');
+            descExpanded = !descExpanded;
+            desc.classList.toggle('line-clamp-3', !descExpanded);
+            arrow.textContent = descExpanded ? 'expand_less' : 'expand_more';
+            btn.textContent = descExpanded ? 'Show less' : 'Read full description';
+        }
+
+        function toggleFav() {
+            const icon = document.getElementById('favIcon');
+            const isFav = icon.textContent === 'favorite';
+            icon.textContent = isFav ? 'favorite_border' : 'favorite';
+            icon.style.fontVariationSettings = isFav ? "'FILL' 0" : "'FILL' 1";
+        }
+
+        let selectedPlan = null;
+
+        function openSubModal() {
+            selectedPlan = null;
+            const overlay = document.createElement('div');
+            overlay.className = 'pay-overlay';
+            overlay.id = 'gw-overlay';
+            overlay.innerHTML = `
+                <div class="pay-box" style="max-width:440px;">
+                    <button class="pay-close" onclick="closeGateway()"><span class="material-symbols-outlined">close</span></button>
+                    <div id="step-plans">
+                        <div class="pay-head">
+                            <span class="material-symbols-outlined pay-head-icon">workspace_premium</span>
+                            <h2>Choose a Plan</h2>
+                            <p>Subscribe to view owner contact details</p>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div class="plan-option" onclick="pickPlan('pro','199')" style="background:rgba(255,255,255,0.03);border:2px solid #222c44;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#222c44'">
+                                <div style="width:44px;height:44px;border-radius:10px;background:rgba(59,130,246,0.15);display:grid;place-items:center;"><span class="material-symbols-outlined" style="color:#3b82f6;font-size:24px;">military_tech</span></div>
+                                <div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#e2e8f0;">Pro</div><div style="font-size:12px;color:#94a3b8;">View owner email</div></div>
+                                <div style="font-size:18px;font-weight:800;color:#3b82f6;">₹199<span style="font-size:11px;color:#94a3b8;font-weight:500;">/mo</span></div>
+                            </div>
+                            <div class="plan-option" onclick="pickPlan('max','499')" style="background:rgba(255,255,255,0.03);border:2px solid #f59e0b;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:0.2s;position:relative;">
+                                <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#422006;font-size:10px;font-weight:700;padding:3px 12px;border-radius:9999px;">Most Popular</div>
+                                <div style="width:44px;height:44px;border-radius:10px;background:rgba(245,158,11,0.15);display:grid;place-items:center;"><span class="material-symbols-outlined" style="color:#f59e0b;font-size:24px;">emoji_events</span></div>
+                                <div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#e2e8f0;">Max</div><div style="font-size:12px;color:#94a3b8;">View email + mobile</div></div>
+                                <div style="font-size:18px;font-weight:800;color:#f59e0b;">₹499<span style="font-size:11px;color:#94a3b8;font-weight:500;">/mo</span></div>
+                            </div>
+                            <div class="plan-option" onclick="pickPlan('promax','999')" style="background:rgba(255,255,255,0.03);border:2px solid #222c44;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:0.2s;" onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='#222c44'">
+                                <div style="width:44px;height:44px;border-radius:10px;background:rgba(168,85,247,0.15);display:grid;place-items:center;"><span class="material-symbols-outlined" style="color:#a855f7;font-size:24px;">diamond</span></div>
+                                <div style="flex:1;"><div style="font-size:16px;font-weight:700;color:#e2e8f0;">Pro Max</div><div style="font-size:12px;color:#94a3b8;">Unlimited access</div></div>
+                                <div style="font-size:18px;font-weight:800;color:#a855f7;">₹999<span style="font-size:11px;color:#94a3b8;font-weight:500;">/mo</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="step-payment" style="display:none;">
+                        <div class="pay-head">
+                            <span class="material-symbols-outlined pay-head-icon">payment</span>
+                            <h2 id="pay-title">Pay for Pro</h2>
+                            <p>Choose payment method</p>
+                        </div>
+                        <div class="pay-grid" id="gw-methods">
+                            <button class="pay-method" onclick="startGW('paytm')"><div class="pay-logo-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#002970"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div><span>Paytm</span></button>
+                            <button class="pay-method" onclick="startGW('phonepe')"><div class="pay-logo-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#5f259f"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div><span>PhonePe</span></button>
+                            <button class="pay-method" onclick="startGW('gpay')"><div class="pay-logo-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/><text x="24" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#4285f4" font-family="Arial">G</text></svg></div><span>Google Pay</span></button>
+                            <button class="pay-method" onclick="startGW('crypto')"><div class="pay-logo-box"><svg viewBox="0 0 48 48" width="40" height="40"><circle cx="24" cy="24" r="24" fill="#f7931a"/><text x="24" y="31" text-anchor="middle" font-size="22" font-weight="bold" fill="#fff" font-family="Arial">₿</text></svg></div><span>Bitcoin</span></button>
+                        </div>
+                        <button onclick="backToPlans()" style="width:100%;margin-top:12px;padding:10px;border-radius:10px;border:1px solid #222c44;background:transparent;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>Back to plans</button>
+                        <div class="gw-loading" id="gw-loading" style="display:none;"><div class="gw-spinner"></div><h3 id="gw-status">Processing...</h3><p id="gw-sub">Please wait</p></div>
+                        <div class="gw-success" id="gw-success" style="display:none;"></div>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+        }
+
+        function pickPlan(name, price) {
+            selectedPlan = name;
+            const names = { pro: 'Pro', max: 'Max', promax: 'Pro Max' };
+            document.getElementById('step-plans').style.display = 'none';
+            document.getElementById('step-payment').style.display = 'block';
+            document.getElementById('pay-title').textContent = 'Pay for ' + names[name] + ' - ₹' + price;
+        }
+
+        function backToPlans() {
+            document.getElementById('step-plans').style.display = 'block';
+            document.getElementById('step-payment').style.display = 'none';
+        }
+
+        function startGW(method) {
+            const names = { pro: 'Pro', max: 'Max', promax: 'Pro Max' };
+            const prices = { pro: '199', max: '499', promax: '999' };
+            document.getElementById('gw-methods').style.display = 'none';
+            document.getElementById('gw-loading').style.display = 'block';
+            const msgs = [{ t: 'Connecting to ' + method + '...', s: 'Secure connection' }, { t: 'Verifying payment of ₹' + prices[selectedPlan], s: 'Please wait' }, { t: 'Processing...', s: 'Almost done' }];
+            let i = 0;
+            const iv = setInterval(() => {
+                if (i < msgs.length) { document.getElementById('gw-status').textContent = msgs[i].t; document.getElementById('gw-sub').textContent = msgs[i].s; i++; }
+                else {
+                    clearInterval(iv);
+                    document.getElementById('gw-loading').style.display = 'none';
+                    document.getElementById('gw-success').style.display = 'block';
+                    document.getElementById('gw-success').innerHTML = '<div class="gw-check" style="color:#f43f5e;"><span class="material-symbols-outlined">error</span></div><h3 style="color:#f43f5e;">Payment Failed!</h3><p>Something went wrong. Please try again.</p><button class="pay-confirm-btn" onclick="closeGateway()" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;">Try Again</button>';
+                }
+            }, 1500);
+        }
+
+        function closeGateway() { const el = document.getElementById('gw-overlay'); if (el) el.remove(); }
+
+        function shareProperty() {
+            const url = window.location.href;
+            const title = document.title;
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    const toast = document.createElement('div');
+                    toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#14b8a6;color:#04211c;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+                    toast.textContent = 'Link copied!';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                });
+            }
+        }
+
+        loadProperty();
+    </script>
+</body>
+</html>

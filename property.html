@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="theme-color" content="#070c1a"/>
+    <title>Find 360 - Property Details</title>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="supabase-js.js"></script>
+    <script src="supabase-config.js?v=6"></script>
+    <style>
+        .detail-page { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .detail-carousel { position: relative; width: 100%; aspect-ratio: 16/10; border-radius: 16px; overflow: hidden; background: #141c30; margin-bottom: 24px; }
+        .detail-carousel .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s ease; }
+        .detail-carousel .slide.active { opacity: 1; }
+        .detail-carousel .dots { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+        .detail-carousel .dots .dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
+        .detail-carousel .dots .dot.active { background: #2dd4bf; border-color: #2dd4bf; transform: scale(1.2); }
+        .detail-title { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .detail-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 16px; }
+        .detail-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+        .detail-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+        .detail-meta span { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text); background: var(--card); padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); }
+        .detail-meta .material-symbols-outlined { font-size: 18px; color: var(--primary); }
+        .owner-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+        .owner-card h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .owner-card h3 .material-symbols-outlined { color: var(--primary); }
+        .owner-field { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+        .owner-field:last-child { border-bottom: none; }
+        .owner-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .owner-value { font-size: 15px; font-weight: 500; color: var(--text); }
+        .masked-info { position: relative; }
+        .masked-info .lock-overlay { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e40af, #3b82f6); color: #fff; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 10px; cursor: pointer; border: none; transition: 0.2s; }
+        .masked-info .lock-overlay:hover { transform: scale(1.03); filter: brightness(1.1); }
+        .masked-info .lock-overlay .material-symbols-outlined { font-size: 16px; }
+        .masked-info .hidden-value { filter: blur(6px); user-select: none; pointer-events: none; color: var(--muted); }
+        .masked-info.revealed .hidden-value { filter: none; user-select: auto; pointer-events: auto; color: var(--text); }
+        .masked-info.revealed .lock-overlay { display: none; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-size: 14px; font-weight: 600; text-decoration: none; margin-bottom: 20px; }
+        .back-link:hover { text-decoration: underline; }
+        .sub-banner { background: linear-gradient(135deg, #1e3a5f, #1e40af); border: 1px solid #3b82f6; border-radius: 12px; padding: 16px 20px; margin-top: 16px; text-align: center; }
+        .sub-banner p { color: #93c5fd; font-size: 13px; margin-bottom: 10px; }
+        .sub-banner .btn-sub { background: #3b82f6; color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .sub-banner .btn-sub:hover { background: #2563eb; }
+        .no-property { text-align: center; padding: 80px 20px; color: var(--muted); }
+        .no-property .material-symbols-outlined { font-size: 64px; margin-bottom: 12px; display: block; }
+
+        /* Payment Modal */
+        .pay-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; animation: fadeIn 0.2s ease;
+        }
+        .pay-box {
+            background: #0f1626; border: 1px solid #222c44;
+            border-radius: 20px; width: 100%; max-width: 400px;
+            max-height: 90vh; overflow-y: auto; position: relative; padding: 28px;
+        }
+        .pay-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid #222c44;
+            border-radius: 50%; width: 34px; height: 34px;
+            display: grid; place-items: center; cursor: pointer; color: #94a3b8;
+        }
+        .pay-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .pay-head { text-align: center; margin-bottom: 24px; }
+        .pay-head-icon { font-size: 44px; color: #14b8a6; display: block; margin-bottom: 8px; }
+        .pay-head h2 { font-size: 22px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+        .pay-head p { font-size: 13px; color: #94a3b8; }
+        .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .pay-method {
+            background: rgba(255,255,255,0.03); border: 2px solid #222c44;
+            border-radius: 14px; padding: 20px 12px; text-align: center;
+            cursor: pointer; transition: 0.2s; color: #e2e8f0;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            font-size: 14px; font-weight: 600;
+        }
+        .pay-method:hover { border-color: #14b8a6; transform: translateY(-3px); background: rgba(20,184,166,0.06); }
+        .pay-logo-box { width: 52px; height: 52px; display: grid; place-items: center; }
+        .gw-loading { text-align: center; padding: 30px 0; }
+        .gw-spinner { width: 56px; height: 56px; border: 4px solid #222c44; border-top-color: #14b8a6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .gw-loading h3 { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; }
+        .gw-loading p { font-size: 13px; color: #94a3b8; }
+        .gw-success { text-align: center; padding: 30px 0; }
+        .gw-check .material-symbols-outlined { font-size: 64px; color: #22c55e; animation: popIn 0.4s ease; }
+        .gw-success h3 { font-size: 20px; font-weight: 700; color: #e2e8f0; margin: 12px 0 6px; }
+        .gw-success p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        .pay-confirm-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #14b8a6, #0d9488); color: #04211c; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .pay-confirm-btn:hover { filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <button class="back-btn" onclick="window.history.length > 1 ? window.history.back() : window.location.href='app.html'">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="brand">
+                <span class="dot"><span class="material-symbols-outlined">explore</span></span>
+                Find 360
+            </div>
+        </div>
+    </header>
+
+    <main class="app detail-page" id="detail-page">
+        <a class="back-link" href="app.html">
+            <span class="material-symbols-outlined">arrow_back</span>Back to listings
+        </a>
+        <div id="detail-content"></div>
+    </main>
+
+    <script>
+        const DEMO = [
+            { id: 'demo-rent-1', title: 'Spacious 2BHK Apartment for Rent', price: 25000, property_type: 'Rent', bhk: '2 BHK', location: 'Navsari, Amaravati', description: 'Modern fully furnished apartment near Navsari bus stand. Covered parking, 24/7 water supply, modular kitchen, split ACs in both bedrooms. Walking distance to Amaravati CRDA office.', image_urls: ['pic/rent/a1.jpeg', 'pic/rent/a2.jpeg', 'pic/rent/a3.jpeg', 'pic/rent/a4.jpeg', 'pic/rent/a5.jpeg', 'pic/rent/a6.jpeg'], verified: true, owner_name: 'Rajesh Kumar', owner_email: 'rajesh.kumar@email.com', owner_mobile: '+91 9876543210' },
+            { id: 'demo-rent-2', title: 'Furnished 1BHK for Singles', price: 12000, property_type: 'Rent', bhk: '1 BHK', location: 'Gadge Nagar, Amaravati', description: 'Compact 1BHK in Gadge Nagar, fully furnished with bed, sofa, wardrobe, AC. Ideal for working professionals. 2 min walk to Gadge Nagar bus stop. Monthly maintenance included.', image_urls: ['pic/rent/b1.jpg', 'pic/rent/b2.jpg', 'pic/rent/b3.jpg', 'pic/rent/b4.jpg'], verified: true, owner_name: 'Kavitha Patil', owner_email: 'kavitha.p@email.com', owner_mobile: '+91 9876511111' },
+            { id: 'demo-rent-3', title: 'Premium 3BHK Family Home', price: 35000, property_type: 'Rent', bhk: '3 BHK', location: 'VMV Road, Amaravati', description: 'Spacious 3BHK on VMV Road with master bedroom ensuite, modular kitchen, dining area, two balconies. Covered car parking for 2 cars. Near Apollo Hospital and VMV shopping complex.', image_urls: ['pic/rent/c1.jpg', 'pic/rent/c2.jpg', 'pic/rent/c3.jpg'], verified: true, owner_name: 'Srinivas Goud', owner_email: 'srinivas.g@email.com', owner_mobile: '+91 9876522222' },
+            { id: 'demo-rent-4', title: 'Modern 2BHK near Capital', price: 22000, property_type: 'Rent', bhk: '2 BHK', location: 'Tadepalli, Amaravati', description: 'Newly constructed 2BHK in Tadepalli with modern fittings, east-facing, good ventilation. Near Amaravati capital secretariat. Ideal for government employees.', image_urls: ['pic/rent/d1.jpg', 'pic/rent/d2.jpg'], verified: true, owner_name: 'Lakshmi Devi', owner_email: 'lakshmi.d@email.com', owner_mobile: '+91 9876533333' },
+            { id: 'demo-rent-5', title: 'Cozy Studio for Students', price: 8000, property_type: 'Rent', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Affordable studio apartment in Thullur near Amaravati university campus. Furnished with bed, desk, wardrobe, kitchenette. WiFi included. Perfect for students.', image_urls: ['pic/rent/e.jpg'], verified: true, owner_name: 'Ravi Teja', owner_email: 'ravi.teja@email.com', owner_mobile: '+91 9876544444' },
+            { id: 'demo-rent-6', title: 'Luxury 2BHK with Terrace', price: 28000, property_type: 'Rent', bhk: '2 BHK', location: 'Katora, Amaravati', description: 'Premium 2BHK in Katora with private terrace, modular kitchen, premium fittings. Close to Amaravati bypass road. Ideal for families who enjoy outdoor space.', image_urls: ['pic/rent/f.jpg', 'pic/rent/g.jpg'], verified: true, owner_name: 'Divya Sharma', owner_email: 'divya.s@email.com', owner_mobile: '+91 9876555555' },
+            { id: 'demo-rent-7', title: 'Spacious 3BHK Independent Floor', price: 30000, property_type: 'Rent', bhk: '3 BHK', location: 'Mangalagiri, Amaravati', description: 'Independent floor in Mangalagiri with 3BHK, open terrace, car parking. Near Mangalagiri temple and bus stand. Quiet residential area with good connectivity.', image_urls: ['pic/rent/h.jpg', 'pic/rent/i.jpg', 'pic/rent/j.jpg'], verified: true, owner_name: 'Prasad Reddy', owner_email: 'prasad.r@email.com', owner_mobile: '+91 9876566666' },
+            { id: 'demo-rent-8', title: '1BHK near Railway Station', price: 10000, property_type: 'Rent', bhk: '1 BHK', location: 'Amaravati Railway Station', description: 'Affordable 1BHK walking distance from Amaravati railway station. Semi-furnished with basic fittings. Ideal for daily commuters. Water and electricity bill included.', image_urls: ['pic/rent/k.jpg', 'pic/rent/l.jpg'], verified: true, owner_name: 'Manoj Kumar', owner_email: 'manoj.k@email.com', owner_mobile: '+91 9876577777' },
+            { id: 'demo-rent-9', title: 'Premium 2BHK in Gated Community', price: 32000, property_type: 'Rent', bhk: '2 BHK', location: 'Rathi Nagar, Amaravati', description: '2BHK in premium gated community in Rathi Nagar with swimming pool, gym, clubhouse access. Fully furnished with branded appliances. 24/7 security and power backup.', image_urls: ['pic/rent/m.jpg', 'pic/rent/n.jpg', 'pic/rent/o.jpg'], verified: true, owner_name: 'Swapna Nair', owner_email: 'swapna.n@email.com', owner_mobile: '+91 9876588888' },
+            { id: 'demo-buy-1', title: 'Premium 3BHK Flat for Sale', price: 8500000, property_type: 'Buy', bhk: '3 BHK', location: 'Gadge Nagar, Amaravati', description: 'East-facing premium flat in Gadge Nagar with high ceiling, Italian marble flooring, premium sanitary fittings. Near Gadge Nagar police station and Amaravati central market.', image_urls: ['pic/buy/a1.jpeg', 'pic/buy/a2.jpeg', 'pic/buy/a3.jpeg'], verified: true, owner_name: 'Priya Sharma', owner_email: 'priya.sharma@email.com', owner_mobile: '+91 9123456789' },
+            { id: 'demo-buy-2', title: 'Elegant 2BHK Flat for Sale', price: 5200000, property_type: 'Buy', bhk: '2 BHK', location: 'VMV Road, Amaravati', description: 'Well-designed 2BHK on main VMV Road with lift facility, covered car parking, children play area. 5 min drive to Amaravati railway station.', image_urls: ['pic/buy/b1.jpeg', 'pic/buy/b2.jpeg'], verified: true, owner_name: 'Amit Patil', owner_email: 'amit.patil@email.com', owner_mobile: '+91 9988776655' },
+            { id: 'demo-buy-3', title: 'Residential Plot in Developing Area', price: 3500000, property_type: 'Buy', bhk: 'Plot', location: 'Rathi Nagar, Amaravati', description: '1200 sq ft east-facing plot in Rathi Nagar with clear title, CRDA approved layout. 200ft road frontage, electricity and water connection available.', image_urls: ['pic/buy/land 1.jpeg', 'pic/buy/land2.jpeg'], verified: true, owner_name: 'Sneha Deshmukh', owner_email: 'sneha.d@email.com', owner_mobile: '+91 9012345678' },
+            { id: 'demo-buy-4', title: 'Luxurious 4BHK Independent House', price: 12500000, property_type: 'Buy', bhk: '4 BHK', location: 'Katora, Amaravati', description: 'Spacious 4BHK independent house in Katora with double-height living room, Italian marble, private garden, servant quarter. Corner plot with 3-side open. Near Katora temple and Amaravati bypass road.', image_urls: ['pic/buy/c1.jpg', 'pic/buy/c2.jpg', 'pic/buy/c3.jpg', 'pic/buy/c4.jpg', 'pic/buy/c5.jpg', 'pic/buy/c6.jpg'], verified: true, owner_name: 'Vikram Rao', owner_email: 'vikram.rao@email.com', owner_mobile: '+91 9876512345' },
+            { id: 'demo-buy-5', title: 'Modern Villa with Swimming Pool', price: 18000000, property_type: 'Buy', bhk: 'Villa', location: 'Tadepalli, Amaravati', description: 'Premium villa in Tadepalli gated community with private swimming pool, landscaped garden, modular kitchen, home theatre. 24/7 security, clubhouse access. 10 min from Amaravati capital city.', image_urls: ['pic/buy/d1.jpg', 'pic/buy/d2.jpg', 'pic/buy/d3.jpg', 'pic/buy/d4.jpg', 'pic/buy/d5.jpg', 'pic/buy/d6.jpg', 'pic/buy/d7.jpg'], verified: true, owner_name: 'Meera Reddy', owner_email: 'meera.reddy@email.com', owner_mobile: '+91 9123498765' },
+            { id: 'demo-buy-6', title: 'Compact 1BHK for Young Professionals', price: 2800000, property_type: 'Buy', bhk: '1 BHK', location: 'Amaravati Capital Zone', description: 'Smart 1BHK apartment in Amaravati Capital Zone, ideal for working professionals. Furnished with modular kitchen, AC, washing machine. Walking distance to secretariat and government offices.', image_urls: ['pic/buy/e1.jpg', 'pic/buy/e2.jpg', 'pic/buy/e3.jpg'], verified: true, owner_name: 'Karthik Nair', owner_email: 'karthik.nair@email.com', owner_mobile: '+91 9988712345' },
+            { id: 'demo-buy-7', title: 'Studio Apartment near Amaravati Hub', price: 1800000, property_type: 'Buy', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Compact studio apartment in Thullur near Amaravati metro hub. Fully furnished with bed, sofa, kitchenette, attached bathroom. Ideal investment property with high rental yield.', image_urls: ['pic/buy/f1.jpg', 'pic/buy/f2.jpg'], verified: true, owner_name: 'Anjali Menon', owner_email: 'anjali.menon@email.com', owner_mobile: '+91 9012398765' },
+            { id: 'demo-buy-8', title: 'Farmhouse with Agricultural Land', price: 4500000, property_type: 'Buy', bhk: 'Farmhouse', location: 'Mangalagiri, Amaravati', description: '2 acre farmhouse with 2BHK constructed house in Mangalagiri. Bore well, drip irrigation, coconut and banana plantation. 15 min from Amaravati, perfect weekend retreat or investment.', image_urls: ['pic/buy/g1.jpg', 'pic/buy/g2.jpg'], verified: true, owner_name: 'Suresh Babu', owner_email: 'suresh.babu@email.com', owner_mobile: '+91 9876598765' }
+        ];
+
+        function formatPrice(n) {
+            if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+            if (n >= 100000) return '₹' + (n / 100000).toFixed(1).replace(/\.0$/, '') + ' L';
+            return '₹' + n.toLocaleString('en-IN');
+        }
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        async function loadProperty() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) { showNotFound(); return; }
+
+            let prop = null;
+
+            if (String(id).startsWith('demo-')) {
+                prop = DEMO.find(p => p.id === id);
+            } else {
+                try {
+                    const { data, error } = await supabase
+                        .from('properties')
+                        .select('*')
+                        .eq('id', id)
+                        .single();
+                    if (!error && data) prop = data;
+                } catch (e) {}
+            }
+
+            if (!prop) { showNotFound(); return; }
+            renderDetail(prop);
+        }
+
+        function showNotFound() {
+            document.getElementById('detail-content').innerHTML = `
+                <div class="no-property">
+                    <span class="material-symbols-outlined">search_off</span>
+                    <p>Property not found.</p>
+                </div>`;
+        }
+
+        function renderDetail(p) {
+            document.title = 'Find 360 - ' + p.title;
+
+            let carouselHtml = '';
+            if (p.image_urls && p.image_urls.length > 1) {
+                const slides = p.image_urls.map((url, i) => `<img class="slide${i === 0 ? ' active' : ''}" src="${esc(url)}" alt="${esc(p.title)}"/>`).join('');
+                const dots = p.image_urls.map((_, i) => `<span class="dot${i === 0 ? ' active' : ''}" data-i="${i}"></span>`).join('');
+                carouselHtml = `<div class="detail-carousel" data-cur="0">${slides}<div class="dots">${dots}</div></div>`;
+            } else if (p.image_urls && p.image_urls.length === 1) {
+                carouselHtml = `<div class="detail-carousel"><img class="slide active" src="${esc(p.image_urls[0])}" alt="${esc(p.title)}"/></div>`;
+            } else {
+                carouselHtml = `<div class="detail-carousel" style="display:grid;place-items:center;"><span class="material-symbols-outlined" style="font-size:64px;color:#3d4a68;">home</span></div>`;
+            }
+
+            const verified = p.verified ? '<span style="color:#2dd4bf;font-size:13px;font-weight:600;">✓ Verified</span>' : '';
+
+            const ownerName = p.owner_name || 'Not available';
+
+            const html = `
+                ${carouselHtml}
+                <div class="detail-price">${formatPrice(p.price)}</div>
+                <div class="detail-title">${esc(p.title)} ${verified}</div>
+                <div class="detail-desc">${esc(p.description || '')}</div>
+                <div class="detail-meta">
+                    <span><span class="material-symbols-outlined">category</span>${esc(p.property_type || '—')}</span>
+                    <span><span class="material-symbols-outlined">bed</span>${esc(p.bhk || '—')}</span>
+                    ${p.location ? `<span><span class="material-symbols-outlined">location_on</span>${esc(p.location)}</span>` : ''}
+                </div>
+                <div class="owner-card">
+                    <h3><span class="material-symbols-outlined">person</span>Owner Details</h3>
+                    <div class="owner-field">
+                        <span class="owner-label">Name</span>
+                        <span class="owner-value">${esc(ownerName)}</span>
+                    </div>
+                    <div class="owner-field">
+                        <span class="owner-label">Email</span>
+                        <div class="masked-info" id="masked-email">
+                            <span class="hidden-value">${esc(p.owner_email || 'xxxx@xxxx.com')}</span>
+                            <button class="lock-overlay" onclick="showSubscribe()">
+                                <span class="material-symbols-outlined">lock</span>Subscribe to view
+                            </button>
+                        </div>
+                    </div>
+                    <div class="owner-field">
+                        <span class="owner-label">Mobile</span>
+                        <div class="masked-info" id="masked-mobile">
+                            <span class="hidden-value">${esc(p.owner_mobile || '+91 XXXXXXXXXX')}</span>
+                            <button class="lock-overlay" onclick="showSubscribe()">
+                                <span class="material-symbols-outlined">lock</span>Subscribe to view
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-banner">
+                    <p>Get full owner contact details with an active subscription</p>
+                    <button class="btn-sub" onclick="showSubscribe()">Subscribe Now</button>
+                </div>
+            `;
+
+            document.getElementById('detail-content').innerHTML = html;
+            startDetailCarousel();
+        }
+
+        function showSubscribe() {
+            const overlay = document.createElement('div');
+            overlay.className = 'pay-overlay';
+            overlay.id = 'gw-overlay';
+            overlay.innerHTML = `
+                <div class="pay-box">
+                    <button class="pay-close" onclick="closeGateway()"><span class="material-symbols-outlined">close</span></button>
+                    <div class="pay-head">
+                        <span class="material-symbols-outlined pay-head-icon">payment</span>
+                        <h2>Subscribe to View Details</h2>
+                        <p>Choose payment method</p>
+                    </div>
+                    <div class="pay-grid" id="gw-methods">
+                        <button class="pay-method" onclick="startGateway('paytm')">
+                            <div class="pay-logo-box paytm-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#002970"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div>
+                            <span>Paytm</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('phonepe')">
+                            <div class="pay-logo-box phonepe-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#5f259f"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div>
+                            <span>PhonePe</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('gpay')">
+                            <div class="pay-logo-box gpay-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/><text x="24" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#4285f4" font-family="Arial">G</text></svg></div>
+                            <span>Google Pay</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('crypto')">
+                            <div class="pay-logo-box crypto-box"><svg viewBox="0 0 48 48" width="40" height="40"><circle cx="24" cy="24" r="24" fill="#f7931a"/><text x="24" y="31" text-anchor="middle" font-size="22" font-weight="bold" fill="#fff" font-family="Arial">₿</text></svg></div>
+                            <span>Bitcoin</span>
+                        </button>
+                    </div>
+                    <div class="gw-loading" id="gw-loading" style="display:none;">
+                        <div class="gw-spinner"></div>
+                        <h3 id="gw-status">Processing payment...</h3>
+                        <p id="gw-sub">Please wait while we connect to payment gateway</p>
+                    </div>
+                    <div class="gw-success" id="gw-success" style="display:none;">
+                        <div class="gw-check"><span class="material-symbols-outlined">check_circle</span></div>
+                        <h3>Payment Successful!</h3>
+                        <p>Your subscription is now active</p>
+                        <button class="pay-confirm-btn" onclick="closeGateway()">Done</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function startGateway(method) {
+            document.getElementById('gw-methods').style.display = 'none';
+            document.getElementById('gw-loading').style.display = 'block';
+            const msgs = [
+                { t: 'Connecting to ' + method + '...', s: 'Secure connection established' },
+                { t: 'Verifying payment of ₹199', s: 'Please wait a moment' },
+                { t: 'Processing transaction...', s: 'Almost done' }
+            ];
+            let i = 0;
+            const iv = setInterval(() => {
+                if (i < msgs.length) {
+                    document.getElementById('gw-status').textContent = msgs[i].t;
+                    document.getElementById('gw-sub').textContent = msgs[i].s;
+                    i++;
+                } else {
+                    clearInterval(iv);
+                    document.getElementById('gw-loading').style.display = 'none';
+                    document.getElementById('gw-success').style.display = 'block';
+                    document.getElementById('gw-success').innerHTML = `
+                        <div class="gw-check" style="color:#f43f5e;"><span class="material-symbols-outlined">error</span></div>
+                        <h3 style="color:#f43f5e;">Payment Failed!</h3>
+                        <p>Something went wrong. Please try again.</p>
+                        <button class="pay-confirm-btn" onclick="closeGateway()" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;">Try Again</button>
+                    `;
+                }
+            }, 1500);
+        }
+
+        function closeGateway() {
+            const el = document.getElementById('gw-overlay');
+            if (el) el.remove();
+            document.body.style.overflow = '';
+        }
+
+        function startDetailCarousel() {
+            const c = document.querySelector('.detail-carousel');
+            if (!c) return;
+            const slides = c.querySelectorAll('.slide');
+            const dots = c.querySelectorAll('.dot');
+            if (slides.length <= 1) return;
+            setInterval(() => {
+                let cur = parseInt(c.dataset.cur) || 0;
+                slides[cur].classList.remove('active');
+                dots[cur].classList.remove('active');
+                cur = (cur + 1) % slides.length;
+                slides[cur].classList.add('active');
+                dots[cur].classList.add('active');
+                c.dataset.cur = cur;
+            }, 2500);
+        }
+
+        loadProperty();
+    </script>
+
+    <!-- Payment Modal -->
+    <div class="pay-overlay" id="pay-modal" style="display:none;" onclick="if(event.target===this)closePayModal()">
+        <div class="pay-box">
+            <button class="pay-close" onclick="closePayModal()"><span class="material-symbols-outlined">close</span></button>
+
+            <div id="pay-options">
+                <div class="pay-head">
+                    <span class="material-symbols-outlined pay-head-icon">payment</span>
+                    <h2>Choose Payment Method</h2>
+                    <p>Select a method to complete subscription</p>
+                </div>
+                <div class="pay-grid">
+                    <button class="pay-method" onclick="selectPayment('paytm')">
+                        <div class="pay-logo-box paytm-box">
+                            <svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#002970"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg>
+                        </div>
+                        <span>Paytm</span>
+                    </button>
+                    <button class="pay-method" onclick="selectPayment('phonepe')">
+                        <div class="pay-logo-box phonepe-box">
+                            <svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#5f259f"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg>
+                        </div>
+                        <span>PhonePe</span>
+                    </button>
+                    <button class="pay-method" onclick="selectPayment('gpay')">
+                        <div class="pay-logo-box gpay-box">
+                            <svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/><text x="24" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#4285f4" font-family="Arial">G</text></svg>
+                        </div>
+                        <span>Google Pay</span>
+                    </button>
+                    <button class="pay-method" onclick="selectPayment('crypto')">
+                        <div class="pay-logo-box crypto-box">
+                            <svg viewBox="0 0 48 48" width="40" height="40"><circle cx="24" cy="24" r="24" fill="#f7931a"/><text x="24" y="31" text-anchor="middle" font-size="22" font-weight="bold" fill="#fff" font-family="Arial">₿</text></svg>
+                        </div>
+                        <span>Bitcoin</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="pay-qr" style="display:none;">
+                <div class="pay-head">
+                    <span class="material-symbols-outlined pay-head-icon">qr_code_scanner</span>
+                    <h2 id="qr-title">Scan to Pay</h2>
+                    <p>Scan the QR code to complete payment</p>
+                </div>
+                <div class="qr-wrap">
+                    <img id="qr-img" src="" alt="QR Code"/>
+                </div>
+                <p class="qr-amount">Amount: <strong>₹199</strong> (Pro Plan)</p>
+                <button class="pay-confirm-btn" onclick="confirmPayment()">I've Completed Payment</button>
+                <button class="pay-back-btn" onclick="document.getElementById('pay-options').style.display='grid';document.getElementById('pay-qr').style.display='none';">
+                    <span class="material-symbols-outlined">arrow_back</span>Back to methods
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

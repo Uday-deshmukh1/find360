@@ -16,12 +16,15 @@
 <body>
     <header class="topbar">
         <div class="topbar-inner">
-            <button class="back-btn" id="back-btn" onclick="goBack()" style="display:none;">
+            <button class="back-btn" id="back-btn" onclick="goBack()">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
             <div class="brand">
                 <span class="dot"><span class="material-symbols-outlined">explore</span></span>
                 Find 360
+                <span class="premium-badge" id="premium-badge" onclick="openPremiumModal()">
+                    <span class="material-symbols-outlined">workspace_premium</span>Premium
+                </span>
             </div>
             <div class="topbar-actions">
                 <button class="theme-toggle" id="install-btn" onclick="installApp()" style="display:none;">
@@ -42,7 +45,6 @@
         <section class="panel active" id="panel-discover">
             <div class="filters-row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <button class="chip active" id="type-rent" onclick="selectType('Rent')">Rent</button>
-                <button class="chip" id="type-sell" onclick="selectType('Sell')">Sell</button>
                 <button class="chip" id="type-buy" onclick="selectType('Buy')">Buy</button>
             </div>
 
@@ -205,6 +207,10 @@
                     <span class="material-symbols-outlined">favorite</span>
                     My Favorites
                 </button>
+                <button class="menu-item premium-menu" id="premium-menu-btn" onclick="openPremiumModal()">
+                    <span class="material-symbols-outlined">workspace_premium</span>
+                    <span id="premium-menu-label">Upgrade to Premium</span>
+                </button>
                 <button class="menu-item" onclick="toggleTheme()">
                     <span class="material-symbols-outlined" id="theme-icon-account">light_mode</span>
                     <span id="theme-label">Light Theme</span>
@@ -235,6 +241,57 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Premium Modal -->
+    <div class="modal-overlay" id="premium-modal" style="display:none;" onclick="if(event.target===this)closePremiumModal()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closePremiumModal()"><span class="material-symbols-outlined">close</span></button>
+            <div class="modal-head">
+                <span class="material-symbols-outlined modal-head-icon">workspace_premium</span>
+                <h2>Upgrade to Premium</h2>
+                <p>Get full access to owner details and exclusive features</p>
+            </div>
+            <div class="plans-row">
+                <div class="plan-card" onclick="selectPlan('pro')">
+                    <div class="plan-icon pro"><span class="material-symbols-outlined">military_tech</span></div>
+                    <h3>Pro</h3>
+                    <div class="plan-price">₹199<span>/month</span></div>
+                    <ul>
+                        <li><span class="material-symbols-outlined">check_circle</span>View owner email</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>5 property listings</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Basic support</li>
+                    </ul>
+                    <button class="plan-btn pro-btn">Select Pro</button>
+                </div>
+                <div class="plan-card popular" onclick="selectPlan('max')">
+                    <div class="plan-popular-tag">Most Popular</div>
+                    <div class="plan-icon max"><span class="material-symbols-outlined">emoji_events</span></div>
+                    <h3>Max</h3>
+                    <div class="plan-price">₹499<span>/month</span></div>
+                    <ul>
+                        <li><span class="material-symbols-outlined">check_circle</span>View owner email + mobile</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>20 property listings</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Priority support</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Featured badge</li>
+                    </ul>
+                    <button class="plan-btn max-btn">Select Max</button>
+                </div>
+                <div class="plan-card" onclick="selectPlan('promax')">
+                    <div class="plan-icon promax"><span class="material-symbols-outlined">diamond</span></div>
+                    <h3>Pro Max</h3>
+                    <div class="plan-price">₹999<span>/month</span></div>
+                    <ul>
+                        <li><span class="material-symbols-outlined">check_circle</span>Unlimited owner access</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Unlimited listings</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>24/7 premium support</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Top search ranking</li>
+                        <li><span class="material-symbols-outlined">check_circle</span>Analytics dashboard</li>
+                    </ul>
+                    <button class="plan-btn promax-btn">Select Pro Max</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const $ = (id) => document.getElementById(id);
 
@@ -246,16 +303,134 @@
         let listType = 'Rent';
         let otpVerified = false;
         let listUploads = [];
+        let isPremium = false;
 
-        const PROPERTY_TYPES = ['Rent', 'Sell', 'Buy'];
+        function openPremiumModal() {
+            $('premium-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePremiumModal() {
+            $('premium-modal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function selectPlan(plan) {
+            const names = { pro: 'Pro', max: 'Max', promax: 'Pro Max' };
+            closePremiumModal();
+            showPaymentGateway(names[plan], '199');
+        }
+
+        function showPaymentGateway(planName, price) {
+            const overlay = document.createElement('div');
+            overlay.className = 'pay-overlay';
+            overlay.id = 'gw-overlay';
+            overlay.innerHTML = `
+                <div class="pay-box">
+                    <button class="pay-close" onclick="closeGateway()"><span class="material-symbols-outlined">close</span></button>
+                    <div class="pay-head">
+                        <span class="material-symbols-outlined pay-head-icon">payment</span>
+                        <h2>${planName} Plan - ₹${price}</h2>
+                        <p>Choose payment method</p>
+                    </div>
+                    <div class="pay-grid" id="gw-methods">
+                        <button class="pay-method" onclick="startGateway('paytm','${planName}','${price}')">
+                            <div class="pay-logo-box paytm-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#002970"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div>
+                            <span>Paytm</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('phonepe','${planName}','${price}')">
+                            <div class="pay-logo-box phonepe-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#5f259f"/><text x="24" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff" font-family="Arial">₹</text></svg></div>
+                            <span>PhonePe</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('gpay','${planName}','${price}')">
+                            <div class="pay-logo-box gpay-box"><svg viewBox="0 0 48 48" width="40" height="40"><rect width="48" height="48" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/><text x="24" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#4285f4" font-family="Arial">G</text></svg></div>
+                            <span>Google Pay</span>
+                        </button>
+                        <button class="pay-method" onclick="startGateway('crypto','${planName}','${price}')">
+                            <div class="pay-logo-box crypto-box"><svg viewBox="0 0 48 48" width="40" height="40"><circle cx="24" cy="24" r="24" fill="#f7931a"/><text x="24" y="31" text-anchor="middle" font-size="22" font-weight="bold" fill="#fff" font-family="Arial">₿</text></svg></div>
+                            <span>Bitcoin</span>
+                        </button>
+                    </div>
+                    <div class="gw-loading" id="gw-loading" style="display:none;">
+                        <div class="gw-spinner"></div>
+                        <h3 id="gw-status">Processing payment...</h3>
+                        <p id="gw-sub">Please wait while we connect to payment gateway</p>
+                    </div>
+                    <div class="gw-success" id="gw-success" style="display:none;">
+                        <div class="gw-check"><span class="material-symbols-outlined">check_circle</span></div>
+                        <h3>Payment Successful!</h3>
+                        <p>Your ${planName} subscription is now active</p>
+                        <button class="pay-confirm-btn" onclick="closeGateway()">Done</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function startGateway(method, plan, price) {
+            document.getElementById('gw-methods').style.display = 'none';
+            document.getElementById('gw-loading').style.display = 'block';
+            const msgs = [
+                { t: 'Connecting to ' + method + '...', s: 'Secure connection established' },
+                { t: 'Verifying payment of ₹' + price, s: 'Please wait a moment' },
+                { t: 'Processing transaction...', s: 'Almost done' }
+            ];
+            let i = 0;
+            const iv = setInterval(() => {
+                if (i < msgs.length) {
+                    document.getElementById('gw-status').textContent = msgs[i].t;
+                    document.getElementById('gw-sub').textContent = msgs[i].s;
+                    i++;
+                } else {
+                    clearInterval(iv);
+                    document.getElementById('gw-loading').style.display = 'none';
+                    document.getElementById('gw-success').style.display = 'block';
+                    document.getElementById('gw-success').innerHTML = `
+                        <div class="gw-check" style="color:#f43f5e;"><span class="material-symbols-outlined">error</span></div>
+                        <h3 style="color:#f43f5e;">Payment Failed!</h3>
+                        <p>Something went wrong. Please try again.</p>
+                        <button class="pay-confirm-btn" onclick="closeGateway()" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;">Try Again</button>
+                    `;
+                }
+            }, 1500);
+        }
+
+        function closeGateway() {
+            const el = document.getElementById('gw-overlay');
+            if (el) el.remove();
+            document.body.style.overflow = '';
+        }
+
+        function updatePremiumBadge() {
+            const badge = $('premium-badge');
+            if (isPremium) {
+                badge.innerHTML = '<span class="material-symbols-outlined">workspace_premium</span>Premium User';
+                badge.classList.add('active');
+                $('premium-menu-label').textContent = 'Premium User ✓';
+                $('premium-menu-btn').classList.add('active');
+            }
+        }
+
+        const PROPERTY_TYPES = ['Rent', 'Buy'];
 
         const DEMO = [
-            { id: 'demo-1', title: 'Spacious 3BHK in Baner', price: 8500000, property_type: 'Sell', bhk: '3 BHK', description: 'Well-ventilated apartment with modern amenities.', image_urls: [], verified: true },
-            { id: 'demo-2', title: 'Modern 2BHK Apartment', price: 5200000, property_type: 'Rent', bhk: '2 BHK', description: 'Smart home features, near the metro station.', image_urls: [], verified: false },
-            { id: 'demo-3', title: 'Luxury Villa with Garden', price: 15000000, property_type: 'Sell', bhk: '4 BHK', description: 'Premium villa with private garden and pool.', image_urls: [], verified: true },
-            { id: 'demo-4', title: 'Cozy 1BHK Near Metro', price: 2800000, property_type: 'Rent', bhk: '1 BHK', description: 'Affordable living with great connectivity.', image_urls: [], verified: false },
-            { id: 'demo-5', title: 'Plot in Growing Area', price: 3500000, property_type: 'Buy', bhk: 'Plot', description: 'Investment-ready plot in an upcoming locality.', image_urls: [], verified: true },
-            { id: 'demo-6', title: '2BHK in Housing Society', price: 4100000, property_type: 'Rent', bhk: '2 BHK', description: 'Gated community with all facilities.', image_urls: [], verified: false }
+            { id: 'demo-rent-1', title: 'Spacious 2BHK Apartment for Rent', price: 25000, property_type: 'Rent', bhk: '2 BHK', location: 'Navsari, Amaravati', description: 'Modern fully furnished apartment near Navsari bus stand. Covered parking, 24/7 water supply, modular kitchen, split ACs in both bedrooms. Walking distance to Amaravati CRDA office.', image_urls: ['pic/rent/a1.jpeg', 'pic/rent/a2.jpeg', 'pic/rent/a3.jpeg', 'pic/rent/a4.jpeg', 'pic/rent/a5.jpeg', 'pic/rent/a6.jpeg'], verified: true, owner_name: 'Rajesh Kumar', owner_email: 'rajesh.kumar@email.com', owner_mobile: '+91 9876543210' },
+            { id: 'demo-rent-2', title: 'Furnished 1BHK for Singles', price: 12000, property_type: 'Rent', bhk: '1 BHK', location: 'Gadge Nagar, Amaravati', description: 'Compact 1BHK in Gadge Nagar, fully furnished with bed, sofa, wardrobe, AC. Ideal for working professionals. 2 min walk to Gadge Nagar bus stop. Monthly maintenance included.', image_urls: ['pic/rent/b1.jpg', 'pic/rent/b2.jpg', 'pic/rent/b3.jpg', 'pic/rent/b4.jpg'], verified: true, owner_name: 'Kavitha Patil', owner_email: 'kavitha.p@email.com', owner_mobile: '+91 9876511111' },
+            { id: 'demo-rent-3', title: 'Premium 3BHK Family Home', price: 35000, property_type: 'Rent', bhk: '3 BHK', location: 'VMV Road, Amaravati', description: 'Spacious 3BHK on VMV Road with master bedroom ensuite, modular kitchen, dining area, two balconies. Covered car parking for 2 cars. Near Apollo Hospital and VMV shopping complex.', image_urls: ['pic/rent/c1.jpg', 'pic/rent/c2.jpg', 'pic/rent/c3.jpg'], verified: true, owner_name: 'Srinivas Goud', owner_email: 'srinivas.g@email.com', owner_mobile: '+91 9876522222' },
+            { id: 'demo-rent-4', title: 'Modern 2BHK near Capital', price: 22000, property_type: 'Rent', bhk: '2 BHK', location: 'Tadepalli, Amaravati', description: 'Newly constructed 2BHK in Tadepalli with modern fittings, east-facing, good ventilation. Near Amaravati capital secretariat. Ideal for government employees.', image_urls: ['pic/rent/d1.jpg', 'pic/rent/d2.jpg'], verified: true, owner_name: 'Lakshmi Devi', owner_email: 'lakshmi.d@email.com', owner_mobile: '+91 9876533333' },
+            { id: 'demo-rent-5', title: 'Cozy Studio for Students', price: 8000, property_type: 'Rent', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Affordable studio apartment in Thullur near Amaravati university campus. Furnished with bed, desk, wardrobe, kitchenette. WiFi included. Perfect for students.', image_urls: ['pic/rent/e.jpg'], verified: true, owner_name: 'Ravi Teja', owner_email: 'ravi.teja@email.com', owner_mobile: '+91 9876544444' },
+            { id: 'demo-rent-6', title: 'Luxury 2BHK with Terrace', price: 28000, property_type: 'Rent', bhk: '2 BHK', location: 'Katora, Amaravati', description: 'Premium 2BHK in Katora with private terrace, modular kitchen, premium fittings. Close to Amaravati bypass road. Ideal for families who enjoy outdoor space.', image_urls: ['pic/rent/f.jpg', 'pic/rent/g.jpg'], verified: true, owner_name: 'Divya Sharma', owner_email: 'divya.s@email.com', owner_mobile: '+91 9876555555' },
+            { id: 'demo-rent-7', title: 'Spacious 3BHK Independent Floor', price: 30000, property_type: 'Rent', bhk: '3 BHK', location: 'Mangalagiri, Amaravati', description: 'Independent floor in Mangalagiri with 3BHK, open terrace, car parking. Near Mangalagiri temple and bus stand. Quiet residential area with good connectivity.', image_urls: ['pic/rent/h.jpg', 'pic/rent/i.jpg', 'pic/rent/j.jpg'], verified: true, owner_name: 'Prasad Reddy', owner_email: 'prasad.r@email.com', owner_mobile: '+91 9876566666' },
+            { id: 'demo-rent-8', title: '1BHK near Railway Station', price: 10000, property_type: 'Rent', bhk: '1 BHK', location: 'Amaravati Railway Station', description: 'Affordable 1BHK walking distance from Amaravati railway station. Semi-furnished with basic fittings. Ideal for daily commuters. Water and electricity bill included.', image_urls: ['pic/rent/k.jpg', 'pic/rent/l.jpg'], verified: true, owner_name: 'Manoj Kumar', owner_email: 'manoj.k@email.com', owner_mobile: '+91 9876577777' },
+            { id: 'demo-rent-9', title: 'Premium 2BHK in Gated Community', price: 32000, property_type: 'Rent', bhk: '2 BHK', location: 'Rathi Nagar, Amaravati', description: '2BHK in premium gated community in Rathi Nagar with swimming pool, gym, clubhouse access. Fully furnished with branded appliances. 24/7 security and power backup.', image_urls: ['pic/rent/m.jpg', 'pic/rent/n.jpg', 'pic/rent/o.jpg'], verified: true, owner_name: 'Swapna Nair', owner_email: 'swapna.n@email.com', owner_mobile: '+91 9876588888' },
+            { id: 'demo-buy-1', title: 'Premium 3BHK Flat for Sale', price: 8500000, property_type: 'Buy', bhk: '3 BHK', location: 'Gadge Nagar, Amaravati', description: 'East-facing premium flat in Gadge Nagar with high ceiling, Italian marble flooring, premium sanitary fittings. Near Gadge Nagar police station and Amaravati central market.', image_urls: ['pic/buy/a1.jpeg', 'pic/buy/a2.jpeg', 'pic/buy/a3.jpeg'], verified: true, owner_name: 'Priya Sharma', owner_email: 'priya.sharma@email.com', owner_mobile: '+91 9123456789' },
+            { id: 'demo-buy-2', title: 'Elegant 2BHK Flat for Sale', price: 5200000, property_type: 'Buy', bhk: '2 BHK', location: 'VMV Road, Amaravati', description: 'Well-designed 2BHK on main VMV Road with lift facility, covered car parking, children play area. 5 min drive to Amaravati railway station.', image_urls: ['pic/buy/b1.jpeg', 'pic/buy/b2.jpeg'], verified: true, owner_name: 'Amit Patil', owner_email: 'amit.patil@email.com', owner_mobile: '+91 9988776655' },
+            { id: 'demo-buy-3', title: 'Residential Plot in Developing Area', price: 3500000, property_type: 'Buy', bhk: 'Plot', location: 'Rathi Nagar, Amaravati', description: '1200 sq ft east-facing plot in Rathi Nagar with clear title, CRDA approved layout. 200ft road frontage, electricity and water connection available.', image_urls: ['pic/buy/land 1.jpeg', 'pic/buy/land2.jpeg'], verified: true, owner_name: 'Sneha Deshmukh', owner_email: 'sneha.d@email.com', owner_mobile: '+91 9012345678' },
+            { id: 'demo-buy-4', title: 'Luxurious 4BHK Independent House', price: 12500000, property_type: 'Buy', bhk: '4 BHK', location: 'Katora, Amaravati', description: 'Spacious 4BHK independent house in Katora with double-height living room, Italian marble, private garden, servant quarter. Corner plot with 3-side open. Near Katora temple and Amaravati bypass road.', image_urls: ['pic/buy/c1.jpg', 'pic/buy/c2.jpg', 'pic/buy/c3.jpg', 'pic/buy/c4.jpg', 'pic/buy/c5.jpg', 'pic/buy/c6.jpg'], verified: true, owner_name: 'Vikram Rao', owner_email: 'vikram.rao@email.com', owner_mobile: '+91 9876512345' },
+            { id: 'demo-buy-5', title: 'Modern Villa with Swimming Pool', price: 18000000, property_type: 'Buy', bhk: 'Villa', location: 'Tadepalli, Amaravati', description: 'Premium villa in Tadepalli gated community with private swimming pool, landscaped garden, modular kitchen, home theatre. 24/7 security, clubhouse access. 10 min from Amaravati capital city.', image_urls: ['pic/buy/d1.jpg', 'pic/buy/d2.jpg', 'pic/buy/d3.jpg', 'pic/buy/d4.jpg', 'pic/buy/d5.jpg', 'pic/buy/d6.jpg', 'pic/buy/d7.jpg'], verified: true, owner_name: 'Meera Reddy', owner_email: 'meera.reddy@email.com', owner_mobile: '+91 9123498765' },
+            { id: 'demo-buy-6', title: 'Compact 1BHK for Young Professionals', price: 2800000, property_type: 'Buy', bhk: '1 BHK', location: 'Amaravati Capital Zone', description: 'Smart 1BHK apartment in Amaravati Capital Zone, ideal for working professionals. Furnished with modular kitchen, AC, washing machine. Walking distance to secretariat and government offices.', image_urls: ['pic/buy/e1.jpg', 'pic/buy/e2.jpg', 'pic/buy/e3.jpg'], verified: true, owner_name: 'Karthik Nair', owner_email: 'karthik.nair@email.com', owner_mobile: '+91 9988712345' },
+            { id: 'demo-buy-7', title: 'Studio Apartment near Amaravati Hub', price: 1800000, property_type: 'Buy', bhk: 'Studio', location: 'Thullur, Amaravati', description: 'Compact studio apartment in Thullur near Amaravati metro hub. Fully furnished with bed, sofa, kitchenette, attached bathroom. Ideal investment property with high rental yield.', image_urls: ['pic/buy/f1.jpg', 'pic/buy/f2.jpg'], verified: true, owner_name: 'Anjali Menon', owner_email: 'anjali.menon@email.com', owner_mobile: '+91 9012398765' },
+            { id: 'demo-buy-8', title: 'Farmhouse with Agricultural Land', price: 4500000, property_type: 'Buy', bhk: 'Farmhouse', location: 'Mangalagiri, Amaravati', description: '2 acre farmhouse with 2BHK constructed house in Mangalagiri. Bore well, drip irrigation, coconut and banana plantation. 15 min from Amaravati, perfect weekend retreat or investment.', image_urls: ['pic/buy/g1.jpg', 'pic/buy/g2.jpg'], verified: true, owner_name: 'Suresh Babu', owner_email: 'suresh.babu@email.com', owner_mobile: '+91 9876598765' }
         ];
 
         function formatPrice(n) {
@@ -319,11 +494,15 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             $('panel-' + tab).classList.add('active');
             document.querySelector('.tab[data-tab="' + tab + '"]')?.classList.add('active');
-            $('back-btn').style.display = tab === 'discover' ? 'none' : 'flex';
         }
 
         function goBack() {
-            switchTab(prevTab);
+            const active = document.querySelector('.panel.active')?.id.replace('panel-', '') || 'discover';
+            if (active === 'discover') {
+                window.location.href = 'index.html';
+            } else {
+                switchTab(prevTab);
+            }
         }
 
         // ===== TYPE FILTER =====
@@ -354,27 +533,39 @@
 
         // ===== PROPERTIES =====
         async function loadProperties() {
-            const { data, error } = await supabase
-                .from('properties')
-                .select('*')
-                .eq('status', 'approved')
-                .order('created_at', { ascending: false });
+            let dbProps = [];
+            try {
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .eq('status', 'approved')
+                    .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error('Load properties error:', error);
-                allProperties = DEMO;
-            } else if (data && data.length > 0) {
-                allProperties = data;
-            } else {
-                allProperties = DEMO;
+                if (error) {
+                    console.error('Load properties error:', error);
+                } else if (data && data.length > 0) {
+                    dbProps = data;
+                }
+            } catch (e) {
+                console.error('Supabase connection failed:', e);
             }
+            const demoIds = new Set(DEMO.map(d => d.id));
+            const uniqueDb = dbProps.filter(p => !demoIds.has(p.id));
+            allProperties = [...DEMO, ...uniqueDb];
             filterAndRender();
         }
 
         function cardHTML(p, inFav) {
-            const img = p.image_urls && p.image_urls.length > 0
-                ? `<img src="${esc(p.image_urls[0])}" alt="${esc(p.title)}" loading="lazy"/>`
-                : `<span class="material-symbols-outlined ph">home</span>`;
+            let imgHtml = '';
+            if (p.image_urls && p.image_urls.length > 1) {
+                const slides = p.image_urls.map((url, i) => `<img class="slide${i === 0 ? ' active' : ''}" src="${esc(url)}" alt="${esc(p.title)}" loading="lazy"/>`).join('');
+                const dots = p.image_urls.map((_, i) => `<span class="dot${i === 0 ? ' active' : ''}" data-i="${i}"></span>`).join('');
+                imgHtml = `<div class="carousel" data-cur="0">${slides}<div class="carousel-dots">${dots}</div></div>`;
+            } else if (p.image_urls && p.image_urls.length === 1) {
+                imgHtml = `<img src="${esc(p.image_urls[0])}" alt="${esc(p.title)}" loading="lazy"/>`;
+            } else {
+                imgHtml = `<span class="material-symbols-outlined ph">home</span>`;
+            }
             const verified = p.verified
                 ? `<span class="verify"><span class="material-symbols-outlined" style="font-size:13px;">verified</span>Verified</span>`
                 : '';
@@ -382,7 +573,7 @@
             return `
                 <article class="prop">
                     <div class="prop-img">
-                        ${img}
+                        ${imgHtml}
                         ${verified}
                         <button class="like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', this, ${inFav})">
                             <span class="material-symbols-outlined">${isLiked ? 'favorite' : 'favorite_border'}</span>
@@ -397,12 +588,38 @@
                             <span><span class="material-symbols-outlined">bed</span>${esc(p.bhk || '—')}</span>
                             ${p.created_at ? `<span><span class="material-symbols-outlined">calendar_today</span>${fmtDate(p.created_at)}</span>` : ''}
                         </div>
+                        <div class="prop-btns">
+                            <button class="btn btn-ghost btn-sm prop-btn-detail" onclick="window.location.href='detail.html?id=${p.id}'">
+                                <span class="material-symbols-outlined">info</span>Details
+                            </button>
+                            <button class="btn btn-primary btn-sm prop-btn-get" onclick="window.location.href='property.html?id=${p.id}'">
+                                <span class="material-symbols-outlined">phone</span>Get
+                            </button>
+                        </div>
                     </div>
                 </article>`;
         }
 
         function renderProps(container, list, inFav) {
             container.innerHTML = list.map(p => cardHTML(p, inFav === 'fav')).join('');
+            startCarousels(container);
+        }
+
+        function startCarousels(container) {
+            container.querySelectorAll('.carousel').forEach(c => {
+                const slides = c.querySelectorAll('.slide');
+                const dots = c.querySelectorAll('.dot');
+                if (slides.length <= 1) return;
+                setInterval(() => {
+                    let cur = parseInt(c.dataset.cur) || 0;
+                    slides[cur].classList.remove('active');
+                    dots[cur].classList.remove('active');
+                    cur = (cur + 1) % slides.length;
+                    slides[cur].classList.add('active');
+                    dots[cur].classList.add('active');
+                    c.dataset.cur = cur;
+                }, 2500);
+            });
         }
 
         // ===== LIKES =====
@@ -656,6 +873,17 @@
             document.documentElement.setAttribute('data-theme', saved);
             updateThemeIcon(saved);
         })();
+
+        // ===== DOWNLOAD LOGO =====
+        function downloadLogo() {
+            const link = document.createElement('a');
+            link.href = 'icon.svg';
+            link.download = 'Find360-Logo.svg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Logo downloaded!');
+        }
 
         // ===== ADD TO HOME SCREEN =====
         let deferredPrompt = null;
