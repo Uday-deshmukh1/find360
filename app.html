@@ -486,6 +486,13 @@
             activeType = 'Rent';
             await loadProperties();
             await loadLikes();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam) {
+                switchTab(tabParam);
+                window.history.replaceState({}, '', 'app.html');
+            }
         });
 
         // ===== PROFILE =====

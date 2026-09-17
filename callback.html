@@ -93,7 +93,7 @@
                 }
 
                 statusEl.textContent = role === 'admin' ? 'Opening dashboard...' : 'Welcome!';
-                go(role === 'admin' ? 'admin.html' : 'app.html');
+                go(role === 'admin' ? 'admin.html' : 'app.html?tab=account');
             } catch (err) {
                 console.error('Callback error:', err);
                 showError('Something went wrong. Please try again.');

@@ -289,7 +289,19 @@
             localStorage.removeItem('login_otp');
             localStorage.removeItem('login_otp_email');
             setStatus('Verified! Redirecting...', 'ok');
-            window.location.href = 'callback.html';
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const user = session.user;
+                let { data: rec } = await supabase.from('users').select('role, banned').eq('id', user.id).maybeSingle();
+                if (rec?.banned) {
+                    await supabase.auth.signOut();
+                    setStatus('Account banned.', 'err');
+                    return;
+                }
+                window.location.href = (rec?.role === 'admin') ? 'admin.html' : 'app.html?tab=account';
+            } else {
+                window.location.href = 'app.html?tab=account';
+            }
         }
     </script>
 </body>
