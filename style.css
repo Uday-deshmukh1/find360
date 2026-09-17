@@ -393,6 +393,36 @@ tbody tr:hover td { background: rgba(45, 212, 191, 0.04); }
     .navlink .material-symbols-outlined { font-size: 21px; }
     .admin-main { padding: 20px 16px 90px; }
     .form-row { grid-template-columns: 1fr; }
+    .topbar-inner { padding: 10px 12px; gap: 8px; }
+    .brand { font-size: 15px; gap: 8px; }
+    .brand .dot { width: 28px; height: 28px; font-size: 16px; }
+    .premium-badge { font-size: 10px; padding: 3px 8px; }
+    .premium-badge .material-symbols-outlined { font-size: 12px; }
+    .topbar-actions { gap: 6px; }
+    .back-btn { width: 32px; height: 32px; }
+}
+
+@media (max-width: 480px) {
+    .topbar-inner { padding: 8px 10px; gap: 6px; overflow: hidden; }
+    .brand { font-size: 14px; gap: 6px; min-width: 0; }
+    .brand .dot { width: 26px; height: 26px; font-size: 14px; border-radius: 8px; flex-shrink: 0; }
+    .premium-badge { font-size: 9px; padding: 2px 6px; letter-spacing: 0; flex-shrink: 0; }
+    .premium-badge .material-symbols-outlined { font-size: 12px; }
+    .premium-text { display: none; }
+    .topbar-actions { gap: 4px; flex-shrink: 0; }
+    .theme-toggle { width: 32px; height: 32px; }
+    h1 { font-size: 28px !important; line-height: 1.2 !important; }
+    .search-box { padding: 12px !important; }
+    .hero-section { padding-top: 60px !important; }
+    .back-btn { display: none; }
+    .chip { font-size: 11px; padding: 4px 8px; }
+    .chip .material-symbols-outlined { font-size: 16px; }
+    .admin-text { display: none; }
+    .brand-text { font-size: 14px; }
+    .topbar-actions .theme-toggle { width: 30px; height: 30px; }
+    .topbar-actions .theme-toggle .material-symbols-outlined { font-size: 18px; }
+    .admin-chip { padding: 4px 6px; }
+    .admin-chip .material-symbols-outlined { font-size: 18px; }
 }
 
 /* ===== PREMIUM BADGE ===== */
